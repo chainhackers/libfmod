@@ -2,6 +2,17 @@ use crate::Api;
 use quote::__private::TokenStream;
 
 impl Api {
+    // FMOD 2.03.09: Filter out removed/renamed fields
+    pub fn should_skip_field(&self, structure: &str, field: &str) -> bool {
+        match (structure, field) {
+            // Removed in 2.03
+            ("FMOD_ADVANCEDSETTINGS", "commandQueueSize") => true,
+            // Renamed in 2.03
+            ("FMOD_OUTPUT_DESCRIPTION", "polling") => true,
+            _ => false,
+        }
+    }
+
     pub fn patch_rust_struct_field_definition(
         &self,
         structure: &str,

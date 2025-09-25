@@ -26,7 +26,7 @@ fn test_core_system_advanced_settings() -> Result<(), Error> {
         max_vorbis_codecs: 32,
         max_at_9_codecs: 32,
         max_fadpcm_codecs: 32,
-        max_pcm_codecs: 0,
+        // max_pcm_codecs removed in FMOD 2.03
         asio_num_channels: 0,
         asio_channel_list: vec![],
         asio_speaker_list: vec![],

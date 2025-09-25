@@ -261,9 +261,12 @@ pub fn generate_structure_union(name: &Ident, union: &Union) -> TokenStream {
     }
 }
 
-pub fn generate_structure(structure: &Structure) -> TokenStream {
+pub fn generate_structure(structure: &Structure, api: &Api) -> TokenStream {
     let name = format_ident!("{}", structure.name);
-    let fields = structure.fields.iter().map(generate_field);
+    let fields = structure.fields
+        .iter()
+        .filter(|field| !api.should_skip_field(&structure.name, &field.name))
+        .map(generate_field);
     let default = generate_structure_default(&structure);
     match &structure.union {
         None => {
@@ -362,7 +365,7 @@ pub fn generate_ffi_code(api: &Api) -> Result<TokenStream, Error> {
 
     let mut structures = vec![];
     for structure in &api.structures {
-        structures.push(generate_structure(structure));
+        structures.push(generate_structure(structure, api));
     }
 
     let mut libraries = vec![];

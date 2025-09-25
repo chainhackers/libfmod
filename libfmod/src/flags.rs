@@ -82,6 +82,7 @@ bitflags! {
         const TYPE_FILE = ffi::FMOD_DEBUG_TYPE_FILE;
         const TYPE_CODEC = ffi::FMOD_DEBUG_TYPE_CODEC;
         const TYPE_TRACE = ffi::FMOD_DEBUG_TYPE_TRACE;
+        const TYPE_VIRTUAL = ffi::FMOD_DEBUG_TYPE_VIRTUAL;
         const DISPLAY_TIMESTAMPS = ffi::FMOD_DEBUG_DISPLAY_TIMESTAMPS;
         const DISPLAY_LINENUMBERS = ffi::FMOD_DEBUG_DISPLAY_LINENUMBERS;
         const DISPLAY_THREAD = ffi::FMOD_DEBUG_DISPLAY_THREAD;
@@ -140,7 +141,6 @@ bitflags! {
         const PREMIX = ffi::FMOD_SYSTEM_CALLBACK_PREMIX;
         const POSTMIX = ffi::FMOD_SYSTEM_CALLBACK_POSTMIX;
         const ERROR = ffi::FMOD_SYSTEM_CALLBACK_ERROR;
-        const MIDMIX = ffi::FMOD_SYSTEM_CALLBACK_MIDMIX;
         const THREADDESTROYED = ffi::FMOD_SYSTEM_CALLBACK_THREADDESTROYED;
         const PREUPDATE = ffi::FMOD_SYSTEM_CALLBACK_PREUPDATE;
         const POSTUPDATE = ffi::FMOD_SYSTEM_CALLBACK_POSTUPDATE;
@@ -205,9 +205,8 @@ bitflags! {
         const MASK_7POINT1 = ffi::FMOD_CHANNELMASK_7POINT1;
     }
 
-    pub struct PortIndex: ffi::FMOD_PORT_INDEX {
-        const NONE = ffi::FMOD_PORT_INDEX_NONE;
-        const FLAG_VR_CONTROLLER = ffi::FMOD_PORT_INDEX_FLAG_VR_CONTROLLER;
+    pub struct PortIndexNone: ffi::FMOD_PORT_INDEX {
+        const FMOD_PORT_INDEX_NONE = ffi::FMOD_PORT_INDEX_NONE;
     }
 
     pub struct ThreadPriority: ffi::FMOD_THREAD_PRIORITY {
@@ -392,7 +391,7 @@ impl Into<ffi::FMOD_CHANNELMASK> for ChannelMask {
     }
 }
 
-impl Into<ffi::FMOD_PORT_INDEX> for PortIndex {
+impl Into<ffi::FMOD_PORT_INDEX> for PortIndexNone {
     fn into(self) -> ffi::FMOD_PORT_INDEX {
         self.bits
     }

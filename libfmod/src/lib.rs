@@ -73,6 +73,13 @@ macro_rules! err_fmod {
         }
     };
 }
+macro_rules! move_string_to_c {
+    ($ value : expr) => {
+        CString::new($value)
+            .unwrap_or(CString::from(c"err!"))
+            .into_raw()
+    };
+}
 macro_rules! err_enum {
     ($ enumeration : expr , $ value : expr) => {
         Error::EnumBindgen {
@@ -152,9 +159,7 @@ where
     F: FnMut(T) -> O,
 {
     let mut values = values.into_iter().map(map).collect::<Vec<O>>();
-    let pointer = values.as_mut_ptr();
-    std::mem::forget(values);
-    pointer
+    Box::into_raw(values.into_boxed_slice()) as *mut _
 }
 const fn from_ref<T: ?Sized>(value: &T) -> *const T {
     value
@@ -1518,6 +1523,7 @@ pub enum DspConnectionType {
     Sidechain,
     Send,
     SendSidechain,
+    Preallocated,
     Max,
 }
 impl From<DspConnectionType> for ffi::FMOD_DSPCONNECTION_TYPE {
@@ -1527,6 +1533,7 @@ impl From<DspConnectionType> for ffi::FMOD_DSPCONNECTION_TYPE {
             DspConnectionType::Sidechain => ffi::FMOD_DSPCONNECTION_TYPE_SIDECHAIN,
             DspConnectionType::Send => ffi::FMOD_DSPCONNECTION_TYPE_SEND,
             DspConnectionType::SendSidechain => ffi::FMOD_DSPCONNECTION_TYPE_SEND_SIDECHAIN,
+            DspConnectionType::Preallocated => ffi::FMOD_DSPCONNECTION_TYPE_PREALLOCATED,
             DspConnectionType::Max => ffi::FMOD_DSPCONNECTION_TYPE_MAX,
         }
     }
@@ -1538,6 +1545,7 @@ impl DspConnectionType {
             ffi::FMOD_DSPCONNECTION_TYPE_SIDECHAIN => Ok(DspConnectionType::Sidechain),
             ffi::FMOD_DSPCONNECTION_TYPE_SEND => Ok(DspConnectionType::Send),
             ffi::FMOD_DSPCONNECTION_TYPE_SEND_SIDECHAIN => Ok(DspConnectionType::SendSidechain),
+            ffi::FMOD_DSPCONNECTION_TYPE_PREALLOCATED => Ok(DspConnectionType::Preallocated),
             ffi::FMOD_DSPCONNECTION_TYPE_MAX => Ok(DspConnectionType::Max),
             _ => Err(err_enum!("FMOD_DSPCONNECTION_TYPE", value)),
         }
@@ -1644,6 +1652,8 @@ pub enum PortType {
     Personal,
     Vibration,
     Aux,
+    Passthrough,
+    VrVibration,
     Max,
 }
 impl From<PortType> for ffi::FMOD_PORT_TYPE {
@@ -1656,6 +1666,8 @@ impl From<PortType> for ffi::FMOD_PORT_TYPE {
             PortType::Personal => ffi::FMOD_PORT_TYPE_PERSONAL,
             PortType::Vibration => ffi::FMOD_PORT_TYPE_VIBRATION,
             PortType::Aux => ffi::FMOD_PORT_TYPE_AUX,
+            PortType::Passthrough => ffi::FMOD_PORT_TYPE_PASSTHROUGH,
+            PortType::VrVibration => ffi::FMOD_PORT_TYPE_VR_VIBRATION,
             PortType::Max => ffi::FMOD_PORT_TYPE_MAX,
         }
     }
@@ -1670,6 +1682,8 @@ impl PortType {
             ffi::FMOD_PORT_TYPE_PERSONAL => Ok(PortType::Personal),
             ffi::FMOD_PORT_TYPE_VIBRATION => Ok(PortType::Vibration),
             ffi::FMOD_PORT_TYPE_AUX => Ok(PortType::Aux),
+            ffi::FMOD_PORT_TYPE_PASSTHROUGH => Ok(PortType::Passthrough),
+            ffi::FMOD_PORT_TYPE_VR_VIBRATION => Ok(PortType::VrVibration),
             ffi::FMOD_PORT_TYPE_MAX => Ok(PortType::Max),
             _ => Err(err_enum!("FMOD_PORT_TYPE", value)),
         }
@@ -1800,6 +1814,7 @@ pub enum DspParameterDataType {
     Fft,
     AttributesMulti3D,
     AttenuationRange,
+    DynamicResponse,
 }
 impl From<DspParameterDataType> for ffi::FMOD_DSP_PARAMETER_DATA_TYPE {
     fn from(value: DspParameterDataType) -> ffi::FMOD_DSP_PARAMETER_DATA_TYPE {
@@ -1814,6 +1829,9 @@ impl From<DspParameterDataType> for ffi::FMOD_DSP_PARAMETER_DATA_TYPE {
             }
             DspParameterDataType::AttenuationRange => {
                 ffi::FMOD_DSP_PARAMETER_DATA_TYPE_ATTENUATION_RANGE
+            }
+            DspParameterDataType::DynamicResponse => {
+                ffi::FMOD_DSP_PARAMETER_DATA_TYPE_DYNAMIC_RESPONSE
             }
         }
     }
@@ -1833,6 +1851,9 @@ impl DspParameterDataType {
             }
             ffi::FMOD_DSP_PARAMETER_DATA_TYPE_ATTENUATION_RANGE => {
                 Ok(DspParameterDataType::AttenuationRange)
+            }
+            ffi::FMOD_DSP_PARAMETER_DATA_TYPE_DYNAMIC_RESPONSE => {
+                Ok(DspParameterDataType::DynamicResponse)
             }
             _ => Err(err_enum!("FMOD_DSP_PARAMETER_DATA_TYPE", value)),
         }
@@ -1855,15 +1876,12 @@ pub enum DspType {
     Parameq,
     Pitchshift,
     Chorus,
-    Vstplugin,
-    Winampplugin,
     Itecho,
     Compressor,
     Sfxreverb,
     LowpassSimple,
     Delay,
     Tremolo,
-    Ladspaplugin,
     Send,
     Return,
     HighpassSimple,
@@ -1871,12 +1889,12 @@ pub enum DspType {
     ThreeEq,
     Fft,
     LoudnessMeter,
-    Envelopefollower,
     Convolutionreverb,
     Channelmix,
     Transceiver,
     Objectpan,
     MultibandEq,
+    MultibandDynamics,
     Max,
 }
 impl From<DspType> for ffi::FMOD_DSP_TYPE {
@@ -1897,15 +1915,12 @@ impl From<DspType> for ffi::FMOD_DSP_TYPE {
             DspType::Parameq => ffi::FMOD_DSP_TYPE_PARAMEQ,
             DspType::Pitchshift => ffi::FMOD_DSP_TYPE_PITCHSHIFT,
             DspType::Chorus => ffi::FMOD_DSP_TYPE_CHORUS,
-            DspType::Vstplugin => ffi::FMOD_DSP_TYPE_VSTPLUGIN,
-            DspType::Winampplugin => ffi::FMOD_DSP_TYPE_WINAMPPLUGIN,
             DspType::Itecho => ffi::FMOD_DSP_TYPE_ITECHO,
             DspType::Compressor => ffi::FMOD_DSP_TYPE_COMPRESSOR,
             DspType::Sfxreverb => ffi::FMOD_DSP_TYPE_SFXREVERB,
             DspType::LowpassSimple => ffi::FMOD_DSP_TYPE_LOWPASS_SIMPLE,
             DspType::Delay => ffi::FMOD_DSP_TYPE_DELAY,
             DspType::Tremolo => ffi::FMOD_DSP_TYPE_TREMOLO,
-            DspType::Ladspaplugin => ffi::FMOD_DSP_TYPE_LADSPAPLUGIN,
             DspType::Send => ffi::FMOD_DSP_TYPE_SEND,
             DspType::Return => ffi::FMOD_DSP_TYPE_RETURN,
             DspType::HighpassSimple => ffi::FMOD_DSP_TYPE_HIGHPASS_SIMPLE,
@@ -1913,12 +1928,12 @@ impl From<DspType> for ffi::FMOD_DSP_TYPE {
             DspType::ThreeEq => ffi::FMOD_DSP_TYPE_THREE_EQ,
             DspType::Fft => ffi::FMOD_DSP_TYPE_FFT,
             DspType::LoudnessMeter => ffi::FMOD_DSP_TYPE_LOUDNESS_METER,
-            DspType::Envelopefollower => ffi::FMOD_DSP_TYPE_ENVELOPEFOLLOWER,
             DspType::Convolutionreverb => ffi::FMOD_DSP_TYPE_CONVOLUTIONREVERB,
             DspType::Channelmix => ffi::FMOD_DSP_TYPE_CHANNELMIX,
             DspType::Transceiver => ffi::FMOD_DSP_TYPE_TRANSCEIVER,
             DspType::Objectpan => ffi::FMOD_DSP_TYPE_OBJECTPAN,
             DspType::MultibandEq => ffi::FMOD_DSP_TYPE_MULTIBAND_EQ,
+            DspType::MultibandDynamics => ffi::FMOD_DSP_TYPE_MULTIBAND_DYNAMICS,
             DspType::Max => ffi::FMOD_DSP_TYPE_MAX,
         }
     }
@@ -1941,15 +1956,12 @@ impl DspType {
             ffi::FMOD_DSP_TYPE_PARAMEQ => Ok(DspType::Parameq),
             ffi::FMOD_DSP_TYPE_PITCHSHIFT => Ok(DspType::Pitchshift),
             ffi::FMOD_DSP_TYPE_CHORUS => Ok(DspType::Chorus),
-            ffi::FMOD_DSP_TYPE_VSTPLUGIN => Ok(DspType::Vstplugin),
-            ffi::FMOD_DSP_TYPE_WINAMPPLUGIN => Ok(DspType::Winampplugin),
             ffi::FMOD_DSP_TYPE_ITECHO => Ok(DspType::Itecho),
             ffi::FMOD_DSP_TYPE_COMPRESSOR => Ok(DspType::Compressor),
             ffi::FMOD_DSP_TYPE_SFXREVERB => Ok(DspType::Sfxreverb),
             ffi::FMOD_DSP_TYPE_LOWPASS_SIMPLE => Ok(DspType::LowpassSimple),
             ffi::FMOD_DSP_TYPE_DELAY => Ok(DspType::Delay),
             ffi::FMOD_DSP_TYPE_TREMOLO => Ok(DspType::Tremolo),
-            ffi::FMOD_DSP_TYPE_LADSPAPLUGIN => Ok(DspType::Ladspaplugin),
             ffi::FMOD_DSP_TYPE_SEND => Ok(DspType::Send),
             ffi::FMOD_DSP_TYPE_RETURN => Ok(DspType::Return),
             ffi::FMOD_DSP_TYPE_HIGHPASS_SIMPLE => Ok(DspType::HighpassSimple),
@@ -1957,12 +1969,12 @@ impl DspType {
             ffi::FMOD_DSP_TYPE_THREE_EQ => Ok(DspType::ThreeEq),
             ffi::FMOD_DSP_TYPE_FFT => Ok(DspType::Fft),
             ffi::FMOD_DSP_TYPE_LOUDNESS_METER => Ok(DspType::LoudnessMeter),
-            ffi::FMOD_DSP_TYPE_ENVELOPEFOLLOWER => Ok(DspType::Envelopefollower),
             ffi::FMOD_DSP_TYPE_CONVOLUTIONREVERB => Ok(DspType::Convolutionreverb),
             ffi::FMOD_DSP_TYPE_CHANNELMIX => Ok(DspType::Channelmix),
             ffi::FMOD_DSP_TYPE_TRANSCEIVER => Ok(DspType::Transceiver),
             ffi::FMOD_DSP_TYPE_OBJECTPAN => Ok(DspType::Objectpan),
             ffi::FMOD_DSP_TYPE_MULTIBAND_EQ => Ok(DspType::MultibandEq),
+            ffi::FMOD_DSP_TYPE_MULTIBAND_DYNAMICS => Ok(DspType::MultibandDynamics),
             ffi::FMOD_DSP_TYPE_MAX => Ok(DspType::Max),
             _ => Err(err_enum!("FMOD_DSP_TYPE", value)),
         }
@@ -2062,6 +2074,7 @@ pub enum DspEcho {
     Feedback,
     DryLevel,
     WetLevel,
+    Delaychangemode,
 }
 impl From<DspEcho> for ffi::FMOD_DSP_ECHO {
     fn from(value: DspEcho) -> ffi::FMOD_DSP_ECHO {
@@ -2070,6 +2083,7 @@ impl From<DspEcho> for ffi::FMOD_DSP_ECHO {
             DspEcho::Feedback => ffi::FMOD_DSP_ECHO_FEEDBACK,
             DspEcho::DryLevel => ffi::FMOD_DSP_ECHO_DRYLEVEL,
             DspEcho::WetLevel => ffi::FMOD_DSP_ECHO_WETLEVEL,
+            DspEcho::Delaychangemode => ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE,
         }
     }
 }
@@ -2080,7 +2094,35 @@ impl DspEcho {
             ffi::FMOD_DSP_ECHO_FEEDBACK => Ok(DspEcho::Feedback),
             ffi::FMOD_DSP_ECHO_DRYLEVEL => Ok(DspEcho::DryLevel),
             ffi::FMOD_DSP_ECHO_WETLEVEL => Ok(DspEcho::WetLevel),
+            ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE => Ok(DspEcho::Delaychangemode),
             _ => Err(err_enum!("FMOD_DSP_ECHO", value)),
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DspEchoDelaychangemodeType {
+    Fade,
+    Lerp,
+    None,
+}
+impl From<DspEchoDelaychangemodeType> for ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_TYPE {
+    fn from(value: DspEchoDelaychangemodeType) -> ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_TYPE {
+        match value {
+            DspEchoDelaychangemodeType::Fade => ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_FADE,
+            DspEchoDelaychangemodeType::Lerp => ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_LERP,
+            DspEchoDelaychangemodeType::None => ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_NONE,
+        }
+    }
+}
+impl DspEchoDelaychangemodeType {
+    pub fn from(
+        value: ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_TYPE,
+    ) -> Result<DspEchoDelaychangemodeType, Error> {
+        match value {
+            ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_FADE => Ok(DspEchoDelaychangemodeType::Fade),
+            ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_LERP => Ok(DspEchoDelaychangemodeType::Lerp),
+            ffi::FMOD_DSP_ECHO_DELAYCHANGEMODE_NONE => Ok(DspEchoDelaychangemodeType::None),
+            _ => Err(err_enum!("FMOD_DSP_ECHO_DELAYCHANGEMODE_TYPE", value)),
         }
     }
 }
@@ -2319,6 +2361,8 @@ pub enum DspMultibandEqFilterType {
     Bandpass,
     Notch,
     AllPass,
+    Lowpass6Db,
+    Highpass6Db,
 }
 impl From<DspMultibandEqFilterType> for ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_TYPE {
     fn from(value: DspMultibandEqFilterType) -> ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_TYPE {
@@ -2342,6 +2386,8 @@ impl From<DspMultibandEqFilterType> for ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_TYPE {
             DspMultibandEqFilterType::Bandpass => ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_BANDPASS,
             DspMultibandEqFilterType::Notch => ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_NOTCH,
             DspMultibandEqFilterType::AllPass => ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_ALLPASS,
+            DspMultibandEqFilterType::Lowpass6Db => ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_LOWPASS_6DB,
+            DspMultibandEqFilterType::Highpass6Db => ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_HIGHPASS_6DB,
         }
     }
 }
@@ -2375,7 +2421,182 @@ impl DspMultibandEqFilterType {
             ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_BANDPASS => Ok(DspMultibandEqFilterType::Bandpass),
             ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_NOTCH => Ok(DspMultibandEqFilterType::Notch),
             ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_ALLPASS => Ok(DspMultibandEqFilterType::AllPass),
+            ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_LOWPASS_6DB => {
+                Ok(DspMultibandEqFilterType::Lowpass6Db)
+            }
+            ffi::FMOD_DSP_MULTIBAND_EQ_FILTER_HIGHPASS_6DB => {
+                Ok(DspMultibandEqFilterType::Highpass6Db)
+            }
             _ => Err(err_enum!("FMOD_DSP_MULTIBAND_EQ_FILTER_TYPE", value)),
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DspMultibandDynamics {
+    LowerFrequency,
+    UpperFrequency,
+    Linked,
+    UseSidechain,
+    AMode,
+    AGain,
+    AThreshold,
+    ARatio,
+    AAttack,
+    ARelease,
+    AGainMakeup,
+    AResponseData,
+    BMode,
+    BGain,
+    BThreshold,
+    BRatio,
+    BAttack,
+    BRelease,
+    BGainMakeup,
+    BResponseData,
+    CMode,
+    CGain,
+    CThreshold,
+    CRatio,
+    CAttack,
+    CRelease,
+    CGainMakeup,
+    CResponseData,
+}
+impl From<DspMultibandDynamics> for ffi::FMOD_DSP_MULTIBAND_DYNAMICS {
+    fn from(value: DspMultibandDynamics) -> ffi::FMOD_DSP_MULTIBAND_DYNAMICS {
+        match value {
+            DspMultibandDynamics::LowerFrequency => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_LOWER_FREQUENCY
+            }
+            DspMultibandDynamics::UpperFrequency => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_UPPER_FREQUENCY
+            }
+            DspMultibandDynamics::Linked => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_LINKED,
+            DspMultibandDynamics::UseSidechain => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_USE_SIDECHAIN,
+            DspMultibandDynamics::AMode => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_MODE,
+            DspMultibandDynamics::AGain => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_GAIN,
+            DspMultibandDynamics::AThreshold => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_THRESHOLD,
+            DspMultibandDynamics::ARatio => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RATIO,
+            DspMultibandDynamics::AAttack => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_ATTACK,
+            DspMultibandDynamics::ARelease => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RELEASE,
+            DspMultibandDynamics::AGainMakeup => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_GAIN_MAKEUP,
+            DspMultibandDynamics::AResponseData => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RESPONSE_DATA,
+            DspMultibandDynamics::BMode => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_MODE,
+            DspMultibandDynamics::BGain => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_GAIN,
+            DspMultibandDynamics::BThreshold => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_THRESHOLD,
+            DspMultibandDynamics::BRatio => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RATIO,
+            DspMultibandDynamics::BAttack => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_ATTACK,
+            DspMultibandDynamics::BRelease => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RELEASE,
+            DspMultibandDynamics::BGainMakeup => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_GAIN_MAKEUP,
+            DspMultibandDynamics::BResponseData => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RESPONSE_DATA,
+            DspMultibandDynamics::CMode => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_MODE,
+            DspMultibandDynamics::CGain => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_GAIN,
+            DspMultibandDynamics::CThreshold => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_THRESHOLD,
+            DspMultibandDynamics::CRatio => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RATIO,
+            DspMultibandDynamics::CAttack => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_ATTACK,
+            DspMultibandDynamics::CRelease => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RELEASE,
+            DspMultibandDynamics::CGainMakeup => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_GAIN_MAKEUP,
+            DspMultibandDynamics::CResponseData => ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RESPONSE_DATA,
+        }
+    }
+}
+impl DspMultibandDynamics {
+    pub fn from(value: ffi::FMOD_DSP_MULTIBAND_DYNAMICS) -> Result<DspMultibandDynamics, Error> {
+        match value {
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_LOWER_FREQUENCY => {
+                Ok(DspMultibandDynamics::LowerFrequency)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_UPPER_FREQUENCY => {
+                Ok(DspMultibandDynamics::UpperFrequency)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_LINKED => Ok(DspMultibandDynamics::Linked),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_USE_SIDECHAIN => {
+                Ok(DspMultibandDynamics::UseSidechain)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_MODE => Ok(DspMultibandDynamics::AMode),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_GAIN => Ok(DspMultibandDynamics::AGain),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_THRESHOLD => Ok(DspMultibandDynamics::AThreshold),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RATIO => Ok(DspMultibandDynamics::ARatio),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_ATTACK => Ok(DspMultibandDynamics::AAttack),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RELEASE => Ok(DspMultibandDynamics::ARelease),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_GAIN_MAKEUP => Ok(DspMultibandDynamics::AGainMakeup),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_A_RESPONSE_DATA => {
+                Ok(DspMultibandDynamics::AResponseData)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_MODE => Ok(DspMultibandDynamics::BMode),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_GAIN => Ok(DspMultibandDynamics::BGain),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_THRESHOLD => Ok(DspMultibandDynamics::BThreshold),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RATIO => Ok(DspMultibandDynamics::BRatio),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_ATTACK => Ok(DspMultibandDynamics::BAttack),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RELEASE => Ok(DspMultibandDynamics::BRelease),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_GAIN_MAKEUP => Ok(DspMultibandDynamics::BGainMakeup),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_B_RESPONSE_DATA => {
+                Ok(DspMultibandDynamics::BResponseData)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_MODE => Ok(DspMultibandDynamics::CMode),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_GAIN => Ok(DspMultibandDynamics::CGain),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_THRESHOLD => Ok(DspMultibandDynamics::CThreshold),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RATIO => Ok(DspMultibandDynamics::CRatio),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_ATTACK => Ok(DspMultibandDynamics::CAttack),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RELEASE => Ok(DspMultibandDynamics::CRelease),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_GAIN_MAKEUP => Ok(DspMultibandDynamics::CGainMakeup),
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_C_RESPONSE_DATA => {
+                Ok(DspMultibandDynamics::CResponseData)
+            }
+            _ => Err(err_enum!("FMOD_DSP_MULTIBAND_DYNAMICS", value)),
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DspMultibandDynamicsModeType {
+    Disabled,
+    CompressUp,
+    CompressDown,
+    ExpandUp,
+    ExpandDown,
+}
+impl From<DspMultibandDynamicsModeType> for ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_TYPE {
+    fn from(value: DspMultibandDynamicsModeType) -> ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_TYPE {
+        match value {
+            DspMultibandDynamicsModeType::Disabled => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_DISABLED
+            }
+            DspMultibandDynamicsModeType::CompressUp => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_COMPRESS_UP
+            }
+            DspMultibandDynamicsModeType::CompressDown => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_COMPRESS_DOWN
+            }
+            DspMultibandDynamicsModeType::ExpandUp => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_EXPAND_UP
+            }
+            DspMultibandDynamicsModeType::ExpandDown => {
+                ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_EXPAND_DOWN
+            }
+        }
+    }
+}
+impl DspMultibandDynamicsModeType {
+    pub fn from(
+        value: ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_TYPE,
+    ) -> Result<DspMultibandDynamicsModeType, Error> {
+        match value {
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_DISABLED => {
+                Ok(DspMultibandDynamicsModeType::Disabled)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_COMPRESS_UP => {
+                Ok(DspMultibandDynamicsModeType::CompressUp)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_COMPRESS_DOWN => {
+                Ok(DspMultibandDynamicsModeType::CompressDown)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_EXPAND_UP => {
+                Ok(DspMultibandDynamicsModeType::ExpandUp)
+            }
+            ffi::FMOD_DSP_MULTIBAND_DYNAMICS_MODE_EXPAND_DOWN => {
+                Ok(DspMultibandDynamicsModeType::ExpandDown)
+            }
+            _ => Err(err_enum!("FMOD_DSP_MULTIBAND_DYNAMICS_MODE_TYPE", value)),
         }
     }
 }
@@ -3007,7 +3228,7 @@ impl DspThreeEq {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DspFftWindow {
+pub enum DspFftWindowType {
     Rect,
     Triangle,
     Hamming,
@@ -3015,45 +3236,79 @@ pub enum DspFftWindow {
     BlackMan,
     BlackManHarris,
 }
-impl From<DspFftWindow> for ffi::FMOD_DSP_FFT_WINDOW {
-    fn from(value: DspFftWindow) -> ffi::FMOD_DSP_FFT_WINDOW {
+impl From<DspFftWindowType> for ffi::FMOD_DSP_FFT_WINDOW_TYPE {
+    fn from(value: DspFftWindowType) -> ffi::FMOD_DSP_FFT_WINDOW_TYPE {
         match value {
-            DspFftWindow::Rect => ffi::FMOD_DSP_FFT_WINDOW_RECT,
-            DspFftWindow::Triangle => ffi::FMOD_DSP_FFT_WINDOW_TRIANGLE,
-            DspFftWindow::Hamming => ffi::FMOD_DSP_FFT_WINDOW_HAMMING,
-            DspFftWindow::Hanning => ffi::FMOD_DSP_FFT_WINDOW_HANNING,
-            DspFftWindow::BlackMan => ffi::FMOD_DSP_FFT_WINDOW_BLACKMAN,
-            DspFftWindow::BlackManHarris => ffi::FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS,
+            DspFftWindowType::Rect => ffi::FMOD_DSP_FFT_WINDOW_RECT,
+            DspFftWindowType::Triangle => ffi::FMOD_DSP_FFT_WINDOW_TRIANGLE,
+            DspFftWindowType::Hamming => ffi::FMOD_DSP_FFT_WINDOW_HAMMING,
+            DspFftWindowType::Hanning => ffi::FMOD_DSP_FFT_WINDOW_HANNING,
+            DspFftWindowType::BlackMan => ffi::FMOD_DSP_FFT_WINDOW_BLACKMAN,
+            DspFftWindowType::BlackManHarris => ffi::FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS,
         }
     }
 }
-impl DspFftWindow {
-    pub fn from(value: ffi::FMOD_DSP_FFT_WINDOW) -> Result<DspFftWindow, Error> {
+impl DspFftWindowType {
+    pub fn from(value: ffi::FMOD_DSP_FFT_WINDOW_TYPE) -> Result<DspFftWindowType, Error> {
         match value {
-            ffi::FMOD_DSP_FFT_WINDOW_RECT => Ok(DspFftWindow::Rect),
-            ffi::FMOD_DSP_FFT_WINDOW_TRIANGLE => Ok(DspFftWindow::Triangle),
-            ffi::FMOD_DSP_FFT_WINDOW_HAMMING => Ok(DspFftWindow::Hamming),
-            ffi::FMOD_DSP_FFT_WINDOW_HANNING => Ok(DspFftWindow::Hanning),
-            ffi::FMOD_DSP_FFT_WINDOW_BLACKMAN => Ok(DspFftWindow::BlackMan),
-            ffi::FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS => Ok(DspFftWindow::BlackManHarris),
-            _ => Err(err_enum!("FMOD_DSP_FFT_WINDOW", value)),
+            ffi::FMOD_DSP_FFT_WINDOW_RECT => Ok(DspFftWindowType::Rect),
+            ffi::FMOD_DSP_FFT_WINDOW_TRIANGLE => Ok(DspFftWindowType::Triangle),
+            ffi::FMOD_DSP_FFT_WINDOW_HAMMING => Ok(DspFftWindowType::Hamming),
+            ffi::FMOD_DSP_FFT_WINDOW_HANNING => Ok(DspFftWindowType::Hanning),
+            ffi::FMOD_DSP_FFT_WINDOW_BLACKMAN => Ok(DspFftWindowType::BlackMan),
+            ffi::FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS => Ok(DspFftWindowType::BlackManHarris),
+            _ => Err(err_enum!("FMOD_DSP_FFT_WINDOW_TYPE", value)),
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DspFftDownmixType {
+    None,
+    Mono,
+}
+impl From<DspFftDownmixType> for ffi::FMOD_DSP_FFT_DOWNMIX_TYPE {
+    fn from(value: DspFftDownmixType) -> ffi::FMOD_DSP_FFT_DOWNMIX_TYPE {
+        match value {
+            DspFftDownmixType::None => ffi::FMOD_DSP_FFT_DOWNMIX_NONE,
+            DspFftDownmixType::Mono => ffi::FMOD_DSP_FFT_DOWNMIX_MONO,
+        }
+    }
+}
+impl DspFftDownmixType {
+    pub fn from(value: ffi::FMOD_DSP_FFT_DOWNMIX_TYPE) -> Result<DspFftDownmixType, Error> {
+        match value {
+            ffi::FMOD_DSP_FFT_DOWNMIX_NONE => Ok(DspFftDownmixType::None),
+            ffi::FMOD_DSP_FFT_DOWNMIX_MONO => Ok(DspFftDownmixType::Mono),
+            _ => Err(err_enum!("FMOD_DSP_FFT_DOWNMIX_TYPE", value)),
         }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DspFft {
     WindowSize,
-    WindowType,
+    Window,
+    BandStartFreq,
+    BandStopFreq,
     SpectrumData,
-    DominantFreq,
+    Rms,
+    SpectralCentroid,
+    ImmediateMode,
+    Downmix,
+    Channel,
 }
 impl From<DspFft> for ffi::FMOD_DSP_FFT {
     fn from(value: DspFft) -> ffi::FMOD_DSP_FFT {
         match value {
             DspFft::WindowSize => ffi::FMOD_DSP_FFT_WINDOWSIZE,
-            DspFft::WindowType => ffi::FMOD_DSP_FFT_WINDOWTYPE,
+            DspFft::Window => ffi::FMOD_DSP_FFT_WINDOW,
+            DspFft::BandStartFreq => ffi::FMOD_DSP_FFT_BAND_START_FREQ,
+            DspFft::BandStopFreq => ffi::FMOD_DSP_FFT_BAND_STOP_FREQ,
             DspFft::SpectrumData => ffi::FMOD_DSP_FFT_SPECTRUMDATA,
-            DspFft::DominantFreq => ffi::FMOD_DSP_FFT_DOMINANT_FREQ,
+            DspFft::Rms => ffi::FMOD_DSP_FFT_RMS,
+            DspFft::SpectralCentroid => ffi::FMOD_DSP_FFT_SPECTRAL_CENTROID,
+            DspFft::ImmediateMode => ffi::FMOD_DSP_FFT_IMMEDIATE_MODE,
+            DspFft::Downmix => ffi::FMOD_DSP_FFT_DOWNMIX,
+            DspFft::Channel => ffi::FMOD_DSP_FFT_CHANNEL,
         }
     }
 }
@@ -3061,9 +3316,15 @@ impl DspFft {
     pub fn from(value: ffi::FMOD_DSP_FFT) -> Result<DspFft, Error> {
         match value {
             ffi::FMOD_DSP_FFT_WINDOWSIZE => Ok(DspFft::WindowSize),
-            ffi::FMOD_DSP_FFT_WINDOWTYPE => Ok(DspFft::WindowType),
+            ffi::FMOD_DSP_FFT_WINDOW => Ok(DspFft::Window),
+            ffi::FMOD_DSP_FFT_BAND_START_FREQ => Ok(DspFft::BandStartFreq),
+            ffi::FMOD_DSP_FFT_BAND_STOP_FREQ => Ok(DspFft::BandStopFreq),
             ffi::FMOD_DSP_FFT_SPECTRUMDATA => Ok(DspFft::SpectrumData),
-            ffi::FMOD_DSP_FFT_DOMINANT_FREQ => Ok(DspFft::DominantFreq),
+            ffi::FMOD_DSP_FFT_RMS => Ok(DspFft::Rms),
+            ffi::FMOD_DSP_FFT_SPECTRAL_CENTROID => Ok(DspFft::SpectralCentroid),
+            ffi::FMOD_DSP_FFT_IMMEDIATE_MODE => Ok(DspFft::ImmediateMode),
+            ffi::FMOD_DSP_FFT_DOWNMIX => Ok(DspFft::Downmix),
+            ffi::FMOD_DSP_FFT_CHANNEL => Ok(DspFft::Channel),
             _ => Err(err_enum!("FMOD_DSP_FFT", value)),
         }
     }
@@ -3133,34 +3394,6 @@ impl DspLoudnessMeterStateType {
                 Ok(DspLoudnessMeterStateType::Analyzing)
             }
             _ => Err(err_enum!("FMOD_DSP_LOUDNESS_METER_STATE_TYPE", value)),
-        }
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DspEnvelopeFollower {
-    Attack,
-    Release,
-    Envelope,
-    UseSidechain,
-}
-impl From<DspEnvelopeFollower> for ffi::FMOD_DSP_ENVELOPEFOLLOWER {
-    fn from(value: DspEnvelopeFollower) -> ffi::FMOD_DSP_ENVELOPEFOLLOWER {
-        match value {
-            DspEnvelopeFollower::Attack => ffi::FMOD_DSP_ENVELOPEFOLLOWER_ATTACK,
-            DspEnvelopeFollower::Release => ffi::FMOD_DSP_ENVELOPEFOLLOWER_RELEASE,
-            DspEnvelopeFollower::Envelope => ffi::FMOD_DSP_ENVELOPEFOLLOWER_ENVELOPE,
-            DspEnvelopeFollower::UseSidechain => ffi::FMOD_DSP_ENVELOPEFOLLOWER_USESIDECHAIN,
-        }
-    }
-}
-impl DspEnvelopeFollower {
-    pub fn from(value: ffi::FMOD_DSP_ENVELOPEFOLLOWER) -> Result<DspEnvelopeFollower, Error> {
-        match value {
-            ffi::FMOD_DSP_ENVELOPEFOLLOWER_ATTACK => Ok(DspEnvelopeFollower::Attack),
-            ffi::FMOD_DSP_ENVELOPEFOLLOWER_RELEASE => Ok(DspEnvelopeFollower::Release),
-            ffi::FMOD_DSP_ENVELOPEFOLLOWER_ENVELOPE => Ok(DspEnvelopeFollower::Envelope),
-            ffi::FMOD_DSP_ENVELOPEFOLLOWER_USESIDECHAIN => Ok(DspEnvelopeFollower::UseSidechain),
-            _ => Err(err_enum!("FMOD_DSP_ENVELOPEFOLLOWER", value)),
         }
     }
 }
@@ -3652,7 +3885,7 @@ impl TryFrom<ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION> for ParameterDescription {
 impl Into<ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION> for ParameterDescription {
     fn into(self) -> ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
         ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             id: self.id.into(),
             minimum: self.minimum,
             maximum: self.maximum,
@@ -3684,7 +3917,7 @@ impl TryFrom<ffi::FMOD_STUDIO_USER_PROPERTY> for UserProperty {
 impl Into<ffi::FMOD_STUDIO_USER_PROPERTY> for UserProperty {
     fn into(self) -> ffi::FMOD_STUDIO_USER_PROPERTY {
         ffi::FMOD_STUDIO_USER_PROPERTY {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             type_: self.type_.into(),
             union: self.union,
         }
@@ -3711,7 +3944,7 @@ impl TryFrom<ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES> for ProgrammerSoundPr
 impl Into<ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES> for ProgrammerSoundProperties {
     fn into(self) -> ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
         ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             sound: self.sound.as_mut_ptr(),
             subsoundIndex: self.subsound_index,
         }
@@ -3736,7 +3969,7 @@ impl TryFrom<ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES> for PluginInstanceProp
 impl Into<ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES> for PluginInstanceProperties {
     fn into(self) -> ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
         ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             dsp: self.dsp.as_mut_ptr(),
         }
     }
@@ -3760,7 +3993,7 @@ impl TryFrom<ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES> for TimelineMarkerProp
 impl Into<ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES> for TimelineMarkerProperties {
     fn into(self) -> ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
         ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             position: self.position,
         }
     }
@@ -3860,7 +4093,7 @@ impl Into<ffi::FMOD_STUDIO_ADVANCEDSETTINGS> for StudioAdvancedSettings {
             studioupdateperiod: self.studioupdateperiod,
             idlesampledatapoolsize: self.idlesampledatapoolsize,
             streamingscheduledelay: self.streamingscheduledelay,
-            encryptionkey: self.encryptionkey.as_ptr().cast(),
+            encryptionkey: move_string_to_c!(self.encryptionkey),
         }
     }
 }
@@ -3965,7 +4198,7 @@ impl TryFrom<ffi::FMOD_STUDIO_SOUND_INFO> for SoundInfo {
 impl Into<ffi::FMOD_STUDIO_SOUND_INFO> for SoundInfo {
     fn into(self) -> ffi::FMOD_STUDIO_SOUND_INFO {
         ffi::FMOD_STUDIO_SOUND_INFO {
-            name_or_data: self.name_or_data.as_ptr().cast(),
+            name_or_data: move_string_to_c!(self.name_or_data),
             mode: self.mode,
             exinfo: self.exinfo.into(),
             subsoundindex: self.subsoundindex,
@@ -4003,7 +4236,7 @@ impl TryFrom<ffi::FMOD_STUDIO_COMMAND_INFO> for CommandInfo {
 impl Into<ffi::FMOD_STUDIO_COMMAND_INFO> for CommandInfo {
     fn into(self) -> ffi::FMOD_STUDIO_COMMAND_INFO {
         ffi::FMOD_STUDIO_COMMAND_INFO {
-            commandname: self.commandname.as_ptr().cast(),
+            commandname: move_string_to_c!(self.commandname),
             parentcommandindex: self.parentcommandindex,
             framenumber: self.framenumber,
             frametime: self.frametime,
@@ -4246,7 +4479,7 @@ pub struct AdvancedSettings {
     pub max_vorbis_codecs: i32,
     pub max_at_9_codecs: i32,
     pub max_fadpcm_codecs: i32,
-    pub max_pcm_codecs: i32,
+    pub max_opus_codecs: i32,
     pub asio_num_channels: i32,
     pub asio_channel_list: Vec<String>,
     pub asio_speaker_list: Vec<Speaker>,
@@ -4260,7 +4493,6 @@ pub struct AdvancedSettings {
     pub resampler_method: DspResampler,
     pub random_seed: u32,
     pub max_convolution_threads: i32,
-    pub max_opus_codecs: i32,
     pub max_spatial_objects: i32,
 }
 impl TryFrom<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
@@ -4274,7 +4506,7 @@ impl TryFrom<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
                 max_vorbis_codecs: value.maxVorbisCodecs,
                 max_at_9_codecs: value.maxAT9Codecs,
                 max_fadpcm_codecs: value.maxFADPCMCodecs,
-                max_pcm_codecs: value.maxPCMCodecs,
+                max_opus_codecs: value.maxOpusCodecs,
                 asio_num_channels: value.ASIONumChannels,
                 asio_channel_list: to_vec!(
                     value.ASIOChannelList,
@@ -4296,7 +4528,6 @@ impl TryFrom<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
                 resampler_method: DspResampler::from(value.resamplerMethod)?,
                 random_seed: value.randomSeed,
                 max_convolution_threads: value.maxConvolutionThreads,
-                max_opus_codecs: value.maxOpusCodecs,
                 max_spatial_objects: value.maxSpatialObjects,
             })
         }
@@ -4312,7 +4543,7 @@ impl Into<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
             maxVorbisCodecs: self.max_vorbis_codecs,
             maxAT9Codecs: self.max_at_9_codecs,
             maxFADPCMCodecs: self.max_fadpcm_codecs,
-            maxPCMCodecs: self.max_pcm_codecs,
+            maxOpusCodecs: self.max_opus_codecs,
             ASIONumChannels: self.asio_num_channels,
             ASIOChannelList: self
                 .asio_channel_list
@@ -4337,7 +4568,6 @@ impl Into<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
             resamplerMethod: self.resampler_method.into(),
             randomSeed: self.random_seed,
             maxConvolutionThreads: self.max_convolution_threads,
-            maxOpusCodecs: self.max_opus_codecs,
             maxSpatialObjects: self.max_spatial_objects,
         }
     }
@@ -4371,7 +4601,7 @@ impl Into<ffi::FMOD_TAG> for Tag {
         ffi::FMOD_TAG {
             type_: self.type_.into(),
             datatype: self.datatype.into(),
-            name: self.name.as_ptr() as *mut _,
+            name: move_string_to_c!(self.name) as *mut _,
             data: self.data,
             datalen: self.datalen,
             updated: self.updated,
@@ -4694,8 +4924,8 @@ impl Into<ffi::FMOD_ERRORCALLBACK_INFO> for ErrorCallbackInfo {
             result: self.result.into(),
             instancetype: self.instancetype.into(),
             instance: self.instance,
-            functionname: self.functionname.as_ptr().cast(),
-            functionparams: self.functionparams.as_ptr().cast(),
+            functionname: move_string_to_c!(self.functionname),
+            functionparams: move_string_to_c!(self.functionparams),
         }
     }
 }
@@ -4804,7 +5034,7 @@ impl Into<ffi::FMOD_CODEC_DESCRIPTION> for CodecDescription {
     fn into(self) -> ffi::FMOD_CODEC_DESCRIPTION {
         ffi::FMOD_CODEC_DESCRIPTION {
             apiversion: self.apiversion,
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             version: self.version,
             defaultasstream: self.defaultasstream,
             timeunits: self.timeunits,
@@ -4860,7 +5090,7 @@ impl TryFrom<ffi::FMOD_CODEC_WAVEFORMAT> for CodecWaveformat {
 impl Into<ffi::FMOD_CODEC_WAVEFORMAT> for CodecWaveformat {
     fn into(self) -> ffi::FMOD_CODEC_WAVEFORMAT {
         ffi::FMOD_CODEC_WAVEFORMAT {
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             format: self.format.into(),
             channels: self.channels,
             frequency: self.frequency,
@@ -5004,7 +5234,7 @@ impl Into<ffi::FMOD_OUTPUT_DESCRIPTION> for OutputDescription {
     fn into(self) -> ffi::FMOD_OUTPUT_DESCRIPTION {
         ffi::FMOD_OUTPUT_DESCRIPTION {
             apiversion: self.apiversion,
-            name: self.name.as_ptr().cast(),
+            name: move_string_to_c!(self.name),
             version: self.version,
             method: self.method,
             getnumdrivers: self.getnumdrivers,
@@ -5353,7 +5583,7 @@ impl Into<ffi::FMOD_DSP_PARAMETER_DESC> for DspParameterDesc {
             type_: self.type_.into(),
             name: self.name,
             label: self.label,
-            description: self.description.as_ptr().cast(),
+            description: move_string_to_c!(self.description),
             union: self.union,
         }
     }
@@ -5527,6 +5757,30 @@ impl Into<ffi::FMOD_DSP_PARAMETER_FFT> for DspParameterFft {
         }
     }
 }
+#[derive(Debug, Clone)]
+pub struct DspParameterDynamicResponse {
+    pub numchannels: i32,
+    pub rms: [f32; 32 as usize],
+}
+impl TryFrom<ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE> for DspParameterDynamicResponse {
+    type Error = Error;
+    fn try_from(value: ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE) -> Result<Self, Self::Error> {
+        unsafe {
+            Ok(DspParameterDynamicResponse {
+                numchannels: value.numchannels,
+                rms: value.rms,
+            })
+        }
+    }
+}
+impl Into<ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE> for DspParameterDynamicResponse {
+    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
+        ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
+            numchannels: self.numchannels,
+            rms: self.rms,
+        }
+    }
+}
 #[derive(Clone)]
 pub struct DspDescription {
     pub pluginsdkversion: u32,
@@ -5608,7 +5862,9 @@ impl Into<ffi::FMOD_DSP_DESCRIPTION> for DspDescription {
             process: self.process,
             setposition: self.setposition,
             numparameters: self.paramdesc.len() as i32,
-            paramdesc: &mut vec_as_mut_ptr(self.paramdesc, |param| param.into()),
+            paramdesc: vec_as_mut_ptr(self.paramdesc, |param| {
+                Box::into_raw(Box::new(param.into()))
+            }),
             setparameterfloat: self.setparameterfloat,
             setparameterint: self.setparameterint,
             setparameterbool: self.setparameterbool,
@@ -10345,6 +10601,15 @@ impl EventInstance {
             }
         }
     }
+    pub fn get_system(&self) -> Result<Studio, Error> {
+        unsafe {
+            let mut system = null_mut();
+            match ffi::FMOD_Studio_EventInstance_GetSystem(self.pointer, &mut system) {
+                ffi::FMOD_OK => Ok(Studio::from(system)),
+                error => Err(err_fmod!("FMOD_Studio_EventInstance_GetSystem", error)),
+            }
+        }
+    }
     pub fn get_volume(&self) -> Result<(f32, f32), Error> {
         unsafe {
             let mut volume = f32::default();
@@ -12377,11 +12642,12 @@ impl System {
             }
         }
     }
-    pub fn get_version(&self) -> Result<u32, Error> {
+    pub fn get_version(&self) -> Result<(u32, u32), Error> {
         unsafe {
             let mut version = u32::default();
-            match ffi::FMOD_System_GetVersion(self.pointer, &mut version) {
-                ffi::FMOD_OK => Ok(version),
+            let mut buildnumber = 0u32;
+            match ffi::FMOD_System_GetVersion(self.pointer, &mut version, &mut buildnumber) {
+                ffi::FMOD_OK => Ok((version, buildnumber)),
                 error => Err(err_fmod!("FMOD_System_GetVersion", error)),
             }
         }
@@ -12533,6 +12799,16 @@ impl System {
             match ffi::FMOD_System_CreateDSPByType(self.pointer, type_.into(), &mut dsp) {
                 ffi::FMOD_OK => Ok(Dsp::from(dsp)),
                 error => Err(err_fmod!("FMOD_System_CreateDSPByType", error)),
+            }
+        }
+    }
+    pub fn create_dsp_connection(&self, type_: DspConnectionType) -> Result<DspConnection, Error> {
+        unsafe {
+            let mut connection = null_mut();
+            match ffi::FMOD_System_CreateDSPConnection(self.pointer, type_.into(), &mut connection)
+            {
+                ffi::FMOD_OK => Ok(DspConnection::from(connection)),
+                error => Err(err_fmod!("FMOD_System_CreateDSPConnection", error)),
             }
         }
     }

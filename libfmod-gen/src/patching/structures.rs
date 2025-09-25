@@ -5,6 +5,9 @@ use quote::__private::TokenStream;
 
 impl Api {
     pub fn patch_structures(&mut self) {
+        // FMOD 2.03.09: Add renamed/new fields
+        // Field renaming is handled during parsing
+        // encryptionkey field for FMOD_STUDIO_ADVANCEDSETTINGS is added automatically
         self.structure_patches.insert("FMOD_DSP_PARAMETER_FFT".to_string(), quote! {
             impl TryFrom<Dsp> for DspParameterFft {
                 type Error = Error;

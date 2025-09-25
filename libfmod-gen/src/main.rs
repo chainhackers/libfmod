@@ -191,20 +191,50 @@ fn generate_lib_fmod(source: &str, destination: &str) -> Result<(), Error> {
     Ok(())
 }
 
-const FMOD_SDK_PATH: &str = "./fmod/20222";
+const FMOD_SDK_PATH: &str = "./fmod/20309";
 const OUTPUT_DIR: &str = "../libfmod";
+const FMOD_VERSION: &str = "2.03.09";
+const EXPECTED_VERSION: u32 = 0x00020309;
 
 fn main() {
+    println!("libfmod-gen for FMOD {}", FMOD_VERSION);
+
     let args: Vec<String> = env::args().collect();
-    let source = match args.get(1) {
-        None => FMOD_SDK_PATH,
-        Some(source) => source,
+
+    // Support --version flag
+    if args.iter().any(|arg| arg == "--version") {
+        println!("libfmod-gen for FMOD {}", FMOD_VERSION);
+        return;
+    }
+
+    // Support --dry-run flag (for testing)
+    let dry_run = args.iter().any(|arg| arg == "--dry-run");
+
+    let source = match args.iter().find(|arg| arg.starts_with("--sdk-path=")) {
+        Some(arg) => &arg[11..],
+        None => match args.get(1) {
+            None => FMOD_SDK_PATH,
+            Some(source) if !source.starts_with("--") => source,
+            _ => FMOD_SDK_PATH,
+        },
     };
-    let destination = match args.get(2) {
-        None => OUTPUT_DIR,
-        Some(destination) => destination,
+
+    let destination = match args.iter().find(|arg| arg.starts_with("--output=")) {
+        Some(arg) => &arg[9..],
+        None => match args.get(2) {
+            None => OUTPUT_DIR,
+            Some(dest) if !dest.starts_with("--") => dest,
+            _ => OUTPUT_DIR,
+        },
     };
-    println!("source {} {}", source, destination);
+
+    println!("Source: {} | Output: {}", source, destination);
+
+    if dry_run {
+        println!("Dry run mode - not generating files");
+        // TODO: Parse and report what would be generated
+        return;
+    }
     if let Err(error) = generate_lib_fmod(&source, &destination) {
         println!("Unable to generate libfmod, {:?}", error);
     }
