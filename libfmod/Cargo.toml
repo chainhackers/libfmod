@@ -21,3 +21,6 @@ logging = []
 [dependencies]
 bitflags = { version = "1", optional = true }
 
+[dev-dependencies]
+crossterm = "0.27"
+
