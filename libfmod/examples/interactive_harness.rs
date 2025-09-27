@@ -106,7 +106,7 @@ impl HarnessState {
             return Ok(());
         }
 
-        let (_path, desc) = &self.event_descriptions[index];
+        let (path, desc) = &self.event_descriptions[index];
         let instance = desc.create_instance()?;
 
         // Set 3D attributes if applicable
@@ -118,8 +118,27 @@ impl HarnessState {
         };
         instance.set_3d_attributes(attributes).ok();
 
+        // Set parameters based on event type
+        let is_one_shot = path.contains("Footstep") || path.contains("Explosion");
+
+        if path.contains("Vehicle") || path.contains("Ride-on Mower") {
+            // Vehicles need RPM to make sound
+            instance.set_parameter_by_name("RPM", 1500.0, false)?;
+        } else if path.contains("Footstep") {
+            // Set surface parameter for footsteps
+            instance.set_parameter_by_name("Surface", 1.0, false).ok();
+        }
+
         instance.start()?;
-        self.active_instances.insert(index, instance);
+
+        // For one-shot events, release immediately after starting
+        // They will play once and clean up automatically
+        if is_one_shot {
+            instance.release()?;
+        } else {
+            // For looping/continuous events, track them
+            self.active_instances.insert(index, instance);
+        }
 
         Ok(())
     }
@@ -185,24 +204,24 @@ fn draw_ui(state: &HarnessState) -> io::Result<()> {
     execute!(stdout,
         SetForegroundColor(Color::Cyan),
         SetAttribute(Attribute::Bold),
-        Print("╔══════════════════════════════════════════════════════════════════════╗\n"),
-        Print("║ FMOD Interactive Test Harness 1.0 │ FPS: "),
+        Print("========================================================================\r\n"),
+        Print("| FMOD Interactive Test Harness 1.0 | FPS: "),
         ResetColor,
         Print(format!("{:3.0}", state.fps)),
         SetForegroundColor(Color::Cyan),
-        Print(" │ Events: "),
+        Print(" | Events: "),
         ResetColor,
         Print(format!("{}/{}", state.active_instances.len(), state.event_descriptions.len())),
         SetForegroundColor(Color::Cyan),
-        Print("       ║\n"),
-        Print("╚══════════════════════════════════════════════════════════════════════╝\n"),
+        Print("       |\r\n"),
+        Print("========================================================================\r\n"),
         ResetColor
     )?;
 
     // Event list
     execute!(stdout,
         SetForegroundColor(Color::Yellow),
-        Print("\n🎵 Available Events:\n"),
+        Print("\r\n> Available Events:\r\n"),
         ResetColor
     )?;
 
@@ -211,7 +230,7 @@ fn draw_ui(state: &HarnessState) -> io::Result<()> {
         let is_selected = i == state.selected_event;
 
         if is_selected {
-            execute!(stdout, SetForegroundColor(Color::Green), Print("→ "))?;
+            execute!(stdout, SetForegroundColor(Color::Green), Print("> "))?;
         } else {
             execute!(stdout, Print("  "))?;
         }
@@ -226,50 +245,50 @@ fn draw_ui(state: &HarnessState) -> io::Result<()> {
         if is_active {
             execute!(stdout,
                 SetForegroundColor(Color::Green),
-                Print(" ▶ PLAYING"),
+                Print(" [PLAYING]"),
                 ResetColor
             )?;
         }
 
-        execute!(stdout, Print("\n"))?;
+        execute!(stdout, Print("\r\n"))?;
     }
 
     // 3D Position display
     execute!(stdout,
-        Print("\n"),
+        Print("\r\n"),
         SetForegroundColor(Color::Yellow),
-        Print("📍 3D Position:\n"),
+        Print("* 3D Position:\r\n"),
         ResetColor,
-        Print(format!("  Source: X:{:5.1} Y:{:5.1} Z:{:5.1}\n",
+        Print(format!("  Source: X:{:5.1} Y:{:5.1} Z:{:5.1}\r\n",
             state.source_pos.x, state.source_pos.y, state.source_pos.z)),
-        Print(format!("  Listener: X:{:5.1} Y:{:5.1} Z:{:5.1}\n",
+        Print(format!("  Listener: X:{:5.1} Y:{:5.1} Z:{:5.1}\r\n",
             state.listener_pos.x, state.listener_pos.y, state.listener_pos.z))
     )?;
 
     // Controls
     if state.show_help {
         execute!(stdout,
-            Print("\n"),
+            Print("\r\n"),
             SetForegroundColor(Color::Cyan),
             SetAttribute(Attribute::Bold),
-            Print("Controls:\n"),
+            Print("Controls:\r\n"),
             ResetColor,
             SetForegroundColor(Color::White),
-            Print("  [1-6]     Play/Stop event\n"),
-            Print("  [Space]   Stop all events\n"),
-            Print("  [WASD]    Move source (X/Z)\n"),
-            Print("  [Q/E]     Move source (Up/Down)\n"),
-            Print("  [+/-]     Adjust parameters\n"),
-            Print("  [R]       Reset position\n"),
-            Print("  [H]       Toggle help\n"),
-            Print("  [Esc]     Exit\n"),
+            Print("  [1-6]     Play/Stop event\r\n"),
+            Print("  [Space]   Stop all events\r\n"),
+            Print("  [WASD]    Move source (X/Z)\r\n"),
+            Print("  [Q/E]     Move source (Up/Down)\r\n"),
+            Print("  [+/-]     Adjust parameters\r\n"),
+            Print("  [R]       Reset position\r\n"),
+            Print("  [H]       Toggle help\r\n"),
+            Print("  [Esc]     Exit\r\n"),
             ResetColor
         )?;
     } else {
         execute!(stdout,
-            Print("\n"),
+            Print("\r\n"),
             SetForegroundColor(Color::DarkGrey),
-            Print("[H] Help  [1-6] Play  [WASD] Move  [Space] Stop All  [Esc] Exit\n"),
+            Print("[H] Help  [1-6] Play  [WASD] Move  [Space] Stop All  [Esc] Exit\r\n"),
             ResetColor
         )?;
     }
