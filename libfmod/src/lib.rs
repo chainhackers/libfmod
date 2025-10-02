@@ -158,7 +158,7 @@ pub fn vec_as_mut_ptr<T, O, F>(values: Vec<T>, map: F) -> *mut O
 where
     F: FnMut(T) -> O,
 {
-    let mut values = values.into_iter().map(map).collect::<Vec<O>>();
+    let values = values.into_iter().map(map).collect::<Vec<O>>();
     Box::into_raw(values.into_boxed_slice()) as *mut _
 }
 const fn from_ref<T: ?Sized>(value: &T) -> *const T {
@@ -4545,19 +4545,8 @@ impl Into<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
             maxFADPCMCodecs: self.max_fadpcm_codecs,
             maxOpusCodecs: self.max_opus_codecs,
             ASIONumChannels: self.asio_num_channels,
-            ASIOChannelList: self
-                .asio_channel_list
-                .into_iter()
-                .map(|val| val.as_ptr())
-                .collect::<Vec<_>>()
-                .as_mut_ptr()
-                .cast(),
-            ASIOSpeakerList: self
-                .asio_speaker_list
-                .into_iter()
-                .map(|val| val.into())
-                .collect::<Vec<_>>()
-                .as_mut_ptr(),
+            ASIOChannelList: vec_as_mut_ptr(self.asio_channel_list, |val| val.as_ptr()).cast(),
+            ASIOSpeakerList: vec_as_mut_ptr(self.asio_speaker_list, |val| val.into()),
             vol0virtualvol: self.vol_0_virtualvol,
             defaultDecodeBufferSize: self.default_decode_buffer_size,
             profilePort: self.profile_port,
