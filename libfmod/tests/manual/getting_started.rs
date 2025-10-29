@@ -26,7 +26,7 @@ fn test_core_system_advanced_settings() -> Result<(), Error> {
         max_vorbis_codecs: 32,
         max_at_9_codecs: 32,
         max_fadpcm_codecs: 32,
-        // max_pcm_codecs removed in FMOD 2.03
+        max_opus_codecs: 32,
         asio_num_channels: 0,
         asio_channel_list: vec![],
         asio_speaker_list: vec![],
@@ -40,7 +40,7 @@ fn test_core_system_advanced_settings() -> Result<(), Error> {
         resampler_method: DspResampler::Spline,
         random_seed: 0,
         max_convolution_threads: 3,
-        max_opus_codecs: 32,
+        max_spatial_objects: 0,
     };
     system.set_advanced_settings(settings)?;
     let settings = system.get_advanced_settings()?;

@@ -12637,12 +12637,12 @@ impl System {
             }
         }
     }
-    pub fn get_version(&self) -> Result<((u32, u32), u32), Error> {
+    pub fn get_version(&self) -> Result<(u32, u32), Error> {
         unsafe {
             let mut version = u32::default();
             let mut buildnumber = 0u32;
             match ffi::FMOD_System_GetVersion(self.pointer, &mut version, &mut buildnumber) {
-                ffi::FMOD_OK => Ok(((version, buildnumber), version)),
+                ffi::FMOD_OK => Ok((version, buildnumber)),
                 error => Err(err_fmod!("FMOD_System_GetVersion", error)),
             }
         }

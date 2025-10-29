@@ -40,11 +40,13 @@ impl Signature {
 
         if function.name == "FMOD_System_GetVersion" && argument.name == "version" {
             // Set the complete return for both version and buildnumber
+            self.targets.push(quote! { let mut version = u32::default(); });
+            self.inputs.push(quote! { &mut version });
             self.outputs.clear();
             self.outputs.push(quote! { (version, buildnumber) });
             self.return_types.clear();
             self.return_types.push(quote! { (u32, u32) });
-            // Don't return true - let it continue to process version normally
+            return true;
         }
 
         // FMOD_Sound_Set3DCustomRolloff
