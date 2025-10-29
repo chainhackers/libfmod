@@ -136,10 +136,10 @@ impl Api {
                 quote! { self.inclusionlist.map(|v| v.len()).unwrap_or(0) as _ }
             }
             ("FMOD_CREATESOUNDEXINFO", "dlsname") => {
-                quote! { opt_ptr!(self.dlsname.map(|v| CString::new(v).unwrap()), |v| v.as_ptr()) }
+                quote! { opt_ptr!(self.dlsname.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
             }
             ("FMOD_CREATESOUNDEXINFO", "encryptionkey") => {
-                quote! { opt_ptr!(self.encryptionkey.map(|v| CString::new(v).unwrap()), |v| v.as_ptr()) }
+                quote! { opt_ptr!(self.encryptionkey.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
             }
             ("FMOD_CREATESOUNDEXINFO", "initialsoundgroup") => {
                 quote! { opt_ptr!(self.initialsoundgroup, |v| v.as_mut_ptr()) }
@@ -166,10 +166,10 @@ impl Api {
                 quote! { self.buffer.as_ptr() as *mut _ }
             }
             ("FMOD_ADVANCEDSETTINGS", "ASIOChannelList") => {
-                quote! { self.asio_channel_list.into_iter().map(|val| val.as_ptr()).collect::<Vec<_>>().as_mut_ptr().cast() }
+                quote! { vec_as_mut_ptr(self.asio_channel_list, |val| val.as_ptr()).cast() }
             }
             ("FMOD_ADVANCEDSETTINGS", "ASIOSpeakerList") => {
-                quote! { self.asio_speaker_list.into_iter().map(|val| val.into()).collect::<Vec<_>>().as_mut_ptr() }
+                quote! { vec_as_mut_ptr(self.asio_speaker_list, |val| val.into()) }
             }
             ("FMOD_DSP_BUFFER_ARRAY", "buffernumchannels") => {
                 quote! { self.buffernumchannels.as_ptr() as *mut _ }
@@ -193,7 +193,7 @@ impl Api {
                 quote! { self.valuenames.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_DESCRIPTION", "paramdesc") => {
-                quote! { vec_as_mut_ptr(self.paramdesc, |param| Box::into_raw(Box::new(param.into()))) }
+                quote! { vec_as_mut_ptr(self.paramdesc, |param| Box::leak(Box::new(param.into())) as *mut _) }
             }
             ("FMOD_DSP_STATE", "sidechaindata") => {
                 quote! { self.sidechaindata.as_ptr() as *mut _ }

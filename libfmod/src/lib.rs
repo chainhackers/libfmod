@@ -159,7 +159,7 @@ where
     F: FnMut(T) -> O,
 {
     let values = values.into_iter().map(map).collect::<Vec<O>>();
-    Box::into_raw(values.into_boxed_slice()) as *mut _
+    Box::leak(values.into_boxed_slice()).as_mut_ptr()
 }
 const fn from_ref<T: ?Sized>(value: &T) -> *const T {
     value
@@ -4706,10 +4706,16 @@ impl Into<ffi::FMOD_CREATESOUNDEXINFO> for CreateSoundexInfo {
             pcmreadcallback: self.pcmreadcallback,
             pcmsetposcallback: self.pcmsetposcallback,
             nonblockcallback: self.nonblockcallback,
-            dlsname: opt_ptr!(self.dlsname.map(|v| CString::new(v).unwrap()), |v| v
-                .as_ptr()),
-            encryptionkey: opt_ptr!(self.encryptionkey.map(|v| CString::new(v).unwrap()), |v| v
-                .as_ptr()),
+            dlsname: opt_ptr!(
+                self.dlsname
+                    .map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())),
+                |v| v.as_ptr()
+            ),
+            encryptionkey: opt_ptr!(
+                self.encryptionkey
+                    .map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())),
+                |v| v.as_ptr()
+            ),
             maxpolyphony: self.maxpolyphony,
             userdata: self.userdata,
             suggestedsoundtype: self.suggestedsoundtype.into(),
@@ -5852,7 +5858,7 @@ impl Into<ffi::FMOD_DSP_DESCRIPTION> for DspDescription {
             setposition: self.setposition,
             numparameters: self.paramdesc.len() as i32,
             paramdesc: vec_as_mut_ptr(self.paramdesc, |param| {
-                Box::into_raw(Box::new(param.into()))
+                Box::leak(Box::new(param.into())) as *mut _
             }),
             setparameterfloat: self.setparameterfloat,
             setparameterint: self.setparameterint,
@@ -12631,12 +12637,12 @@ impl System {
             }
         }
     }
-    pub fn get_version(&self) -> Result<(u32, u32), Error> {
+    pub fn get_version(&self) -> Result<((u32, u32), u32), Error> {
         unsafe {
             let mut version = u32::default();
             let mut buildnumber = 0u32;
             match ffi::FMOD_System_GetVersion(self.pointer, &mut version, &mut buildnumber) {
-                ffi::FMOD_OK => Ok((version, buildnumber)),
+                ffi::FMOD_OK => Ok(((version, buildnumber), version)),
                 error => Err(err_fmod!("FMOD_System_GetVersion", error)),
             }
         }

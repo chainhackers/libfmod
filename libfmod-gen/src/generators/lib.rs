@@ -1133,8 +1133,8 @@ pub fn generate_lib_code(api: &Api) -> Result<TokenStream, Error> {
         where
             F: FnMut(T) -> O,
         {
-            let mut values = values.into_iter().map(map).collect::<Vec<O>>();
-            Box::into_raw(values.into_boxed_slice()) as *mut _
+            let values = values.into_iter().map(map).collect::<Vec<O>>();
+            Box::leak(values.into_boxed_slice()).as_mut_ptr()
         }
 
         const fn from_ref<T: ?Sized>(value: &T) -> *const T {
