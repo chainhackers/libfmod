@@ -440,6 +440,7 @@ struct OutArgument {
 struct InArgument {
     pub param: TokenStream,
     pub input: TokenStream,
+    pub target: Option<TokenStream>,
 }
 
 pub fn quote_tuple(items: &Vec<TokenStream>) -> TokenStream {
@@ -461,30 +462,40 @@ fn map_optional(argument: &Argument, api: &Api) -> InArgument {
             ":int" => InArgument {
                 param: quote! { #name: Option<i32> },
                 input: quote! { #name.unwrap_or(0) },
+                target: None,
             },
             ":float" => InArgument {
                 param: quote! { #name: Option<f32> },
                 input: quote! { #name.unwrap_or(0.0) },
+                target: None,
             },
             ":unsigned long long" => InArgument {
                 param: quote! { #name: Option<u64> },
                 input: quote! { #name.unwrap_or(0) },
+                target: None,
             },
             ":unsigned int" => InArgument {
                 param: quote! { #name: Option<u32> },
                 input: quote! { #name.unwrap_or(0) },
+                target: None,
             },
             "*mut:float" => InArgument {
                 param: quote! { #name: Option<*mut f32> },
                 input: quote! { #name.unwrap_or(null_mut()) },
+                target: None,
             },
-            "*const:char" => InArgument {
-                param: quote! { #name: Option<String> },
-                input: quote! { #name.map(|value| CString::new(value).map(|value| value.as_ptr())).unwrap_or(Ok(null_mut()))? },
+            "*const:char" => {
+                let c_name = format_ident!("c_{}", name);
+                InArgument {
+                    param: quote! { #name: Option<String> },
+                    input: quote! { #c_name.as_ref().map_or(null_mut(), |s| s.as_ptr()) },
+                    target: Some(quote! { let #c_name = #name.map(|s| CString::new(s)).transpose()?; }),
+                }
             },
             "*mut:void" => InArgument {
                 param: quote! { #name: Option<*mut c_void> },
                 input: quote! { #name.unwrap_or(null_mut()) },
+                target: None,
             },
             argument_type => {
                 unimplemented!("opt {}", argument_type)
@@ -497,22 +508,27 @@ fn map_optional(argument: &Argument, api: &Api) -> InArgument {
                 ("*mut", UserTypeDesc::Structure) => InArgument {
                     param: quote! { #name: Option<#tp> },
                     input: quote! { #name.map(|value| &mut value.into() as *mut _).unwrap_or(null_mut()) },
+                    target: None,
                 },
                 ("*mut", UserTypeDesc::OpaqueType) => InArgument {
                     param: quote! { #name: Option<#tp> },
                     input: quote! { #name.map(|value| value.as_mut_ptr()).unwrap_or(null_mut()) },
+                    target: None,
                 },
                 ("*const", UserTypeDesc::Structure) => InArgument {
                     param: quote! { #name: Option<#tp> },
                     input: quote! { #name.map(#tp::into).as_ref().map(from_ref).unwrap_or_else(null) },
+                    target: None,
                 },
                 ("", UserTypeDesc::Enumeration) => InArgument {
                     param: quote! { #name: Option<#tp> },
                     input: quote! { #name.map(|value| value.into()).unwrap_or(0) },
+                    target: None,
                 },
                 ("", UserTypeDesc::Callback) => InArgument {
                     param: quote! { #name: ffi::#ident },
                     input: quote! { #name },
+                    target: None,
                 },
                 user_type => unimplemented!("opt {:?}", user_type),
             }
@@ -529,34 +545,45 @@ fn map_input(argument: &Argument, api: &Api) -> InArgument {
             ":float" => InArgument {
                 param: quote! { #argument: f32 },
                 input: quote! { #argument },
+                target: None,
             },
             ":int" => InArgument {
                 param: quote! { #argument: i32 },
                 input: quote! { #argument },
+                target: None,
             },
             ":unsigned int" => InArgument {
                 param: quote! { #argument: u32 },
                 input: quote! { #argument },
+                target: None,
             },
             ":unsigned long long" => InArgument {
                 param: quote! { #argument: u64 },
                 input: quote! { #argument },
+                target: None,
             },
-            "*const:char" => InArgument {
-                param: quote! { #argument: &str },
-                input: quote! { CString::new(#argument)?.as_ptr() },
+            "*const:char" => {
+                let c_arg = format_ident!("c_{}", argument);
+                InArgument {
+                    param: quote! { #argument: &str },
+                    input: quote! { #c_arg.as_ptr() },
+                    target: Some(quote! { let #c_arg = CString::new(#argument)?; }),
+                }
             },
             "*mut:void" => InArgument {
                 param: quote! { #argument: *mut c_void },
                 input: quote! { #argument },
+                target: None,
             },
             "*const:void" => InArgument {
                 param: quote! { #argument: *const c_void },
                 input: quote! { #argument },
+                target: None,
             },
             "*mut:float" => InArgument {
                 param: quote! { #argument: *mut f32 },
                 input: quote! { #argument },
+                target: None,
             },
             _ => unimplemented!(),
         },
@@ -567,39 +594,48 @@ fn map_input(argument: &Argument, api: &Api) -> InArgument {
                 ("*mut", UserTypeDesc::OpaqueType) => InArgument {
                     param: quote! { #argument: #rust_type },
                     input: quote! { #argument.as_mut_ptr() },
+                    target: None,
                 },
                 ("*const", UserTypeDesc::Structure) => InArgument {
                     param: quote! { #argument: #rust_type },
                     input: quote! { &#argument.into() },
+                    target: None,
                 },
                 ("*mut", UserTypeDesc::Structure) => InArgument {
                     param: quote! { #argument: #rust_type },
                     input: quote! { &mut #argument.into() },
+                    target: None,
                 },
                 ("", UserTypeDesc::Structure) => InArgument {
                     param: quote! { #argument: #rust_type },
                     input: quote! { #argument.into() },
+                    target: None,
                 },
                 ("", UserTypeDesc::Flags) => InArgument {
                     param: quote! { #argument: impl Into<ffi::#ident> },
                     input: quote! { #argument.into() },
+                    target: None,
                 },
                 ("", UserTypeDesc::Enumeration) => InArgument {
                     param: quote! { #argument: #rust_type },
                     input: quote! { #argument.into() },
+                    target: None,
                 },
                 ("", UserTypeDesc::Callback) => InArgument {
                     param: quote! { #argument: ffi::#ident },
                     input: quote! { #argument },
+                    target: None,
                 },
                 ("", UserTypeDesc::TypeAlias) => match &type_name[..] {
                     "FMOD_BOOL" => InArgument {
                         param: quote! { #argument: bool },
                         input: quote! { from_bool!(#argument) },
+                        target: None,
                     },
                     "FMOD_PORT_INDEX" => InArgument {
                         param: quote! { #argument: u64 },
                         input: quote! { #argument },
+                        target: None,
                     },
                     _ => unimplemented!(),
                 },
@@ -769,6 +805,9 @@ impl AddAssign<InArgument> for Signature {
     fn add_assign(&mut self, argument: InArgument) {
         self.arguments.push(argument.param);
         self.inputs.push(argument.input);
+        if let Some(target) = argument.target {
+            self.targets.push(target);
+        }
     }
 }
 

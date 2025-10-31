@@ -8990,10 +8990,11 @@ impl Sound {
     }
     pub fn get_tag(&self, name: &str, index: Option<i32>) -> Result<Tag, Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut tag = ffi::FMOD_TAG::default();
             match ffi::FMOD_Sound_GetTag(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 index.unwrap_or(0),
                 &mut tag,
             ) {
@@ -9111,13 +9112,13 @@ impl Sound {
         name: Option<String>,
     ) -> Result<SyncPoint, Error> {
         unsafe {
+            let c_name = name.map(|s| CString::new(s)).transpose()?;
             let mut point = null_mut();
             match ffi::FMOD_Sound_AddSyncPoint(
                 self.pointer,
                 offset,
                 offsettype.into(),
-                name.map(|value| CString::new(value).map(|value| value.as_ptr()))
-                    .unwrap_or(Ok(null_mut()))?,
+                c_name.as_ref().map_or(null_mut(), |s| s.as_ptr()),
                 &mut point,
             ) {
                 ffi::FMOD_OK => Ok(SyncPoint::from(point)),
@@ -9927,10 +9928,8 @@ impl CommandReplay {
     }
     pub fn set_bank_path(&self, bank_path: &str) -> Result<(), Error> {
         unsafe {
-            match ffi::FMOD_Studio_CommandReplay_SetBankPath(
-                self.pointer,
-                CString::new(bank_path)?.as_ptr(),
-            ) {
+            let c_bank_path = CString::new(bank_path)?;
+            match ffi::FMOD_Studio_CommandReplay_SetBankPath(self.pointer, c_bank_path.as_ptr()) {
                 ffi::FMOD_OK => Ok(()),
                 error => Err(err_fmod!("FMOD_Studio_CommandReplay_SetBankPath", error)),
             }
@@ -10175,10 +10174,11 @@ impl EventDescription {
         name: &str,
     ) -> Result<ParameterDescription, Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut parameter = ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION::default();
             match ffi::FMOD_Studio_EventDescription_GetParameterDescriptionByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 &mut parameter,
             ) {
                 ffi::FMOD_OK => Ok(ParameterDescription::try_from(parameter)?),
@@ -10245,11 +10245,12 @@ impl EventDescription {
         size: i32,
     ) -> Result<(String, i32), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let label = CString::from_vec_unchecked(b"".to_vec()).into_raw();
             let mut retrieved = i32::default();
             match ffi::FMOD_Studio_EventDescription_GetParameterLabelByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 labelindex,
                 label,
                 size,
@@ -10328,10 +10329,11 @@ impl EventDescription {
     }
     pub fn get_user_property(&self, name: &str) -> Result<UserProperty, Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut property = ffi::FMOD_STUDIO_USER_PROPERTY::default();
             match ffi::FMOD_Studio_EventDescription_GetUserProperty(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 &mut property,
             ) {
                 ffi::FMOD_OK => Ok(UserProperty::try_from(property)?),
@@ -10843,11 +10845,12 @@ impl EventInstance {
     }
     pub fn get_parameter_by_name(&self, name: &str) -> Result<(f32, f32), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut value = f32::default();
             let mut finalvalue = f32::default();
             match ffi::FMOD_Studio_EventInstance_GetParameterByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 &mut value,
                 &mut finalvalue,
             ) {
@@ -10866,9 +10869,10 @@ impl EventInstance {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             match ffi::FMOD_Studio_EventInstance_SetParameterByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 value,
                 from_bool!(ignoreseekspeed),
             ) {
@@ -10887,10 +10891,12 @@ impl EventInstance {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
+            let c_label = CString::new(label)?;
             match ffi::FMOD_Studio_EventInstance_SetParameterByNameWithLabel(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
-                CString::new(label)?.as_ptr(),
+                c_name.as_ptr(),
+                c_label.as_ptr(),
                 from_bool!(ignoreseekspeed),
             ) {
                 ffi::FMOD_OK => Ok(()),
@@ -10947,10 +10953,11 @@ impl EventInstance {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_label = CString::new(label)?;
             match ffi::FMOD_Studio_EventInstance_SetParameterByIDWithLabel(
                 self.pointer,
                 id.into(),
-                CString::new(label)?.as_ptr(),
+                c_label.as_ptr(),
                 from_bool!(ignoreseekspeed),
             ) {
                 ffi::FMOD_OK => Ok(()),
@@ -11140,12 +11147,10 @@ impl Studio {
     }
     pub fn get_event(&self, path_or_id: &str) -> Result<EventDescription, Error> {
         unsafe {
+            let c_path_or_id = CString::new(path_or_id)?;
             let mut event = null_mut();
-            match ffi::FMOD_Studio_System_GetEvent(
-                self.pointer,
-                CString::new(path_or_id)?.as_ptr(),
-                &mut event,
-            ) {
+            match ffi::FMOD_Studio_System_GetEvent(self.pointer, c_path_or_id.as_ptr(), &mut event)
+            {
                 ffi::FMOD_OK => Ok(EventDescription::from(event)),
                 error => Err(err_fmod!("FMOD_Studio_System_GetEvent", error)),
             }
@@ -11153,12 +11158,9 @@ impl Studio {
     }
     pub fn get_bus(&self, path_or_id: &str) -> Result<Bus, Error> {
         unsafe {
+            let c_path_or_id = CString::new(path_or_id)?;
             let mut bus = null_mut();
-            match ffi::FMOD_Studio_System_GetBus(
-                self.pointer,
-                CString::new(path_or_id)?.as_ptr(),
-                &mut bus,
-            ) {
+            match ffi::FMOD_Studio_System_GetBus(self.pointer, c_path_or_id.as_ptr(), &mut bus) {
                 ffi::FMOD_OK => Ok(Bus::from(bus)),
                 error => Err(err_fmod!("FMOD_Studio_System_GetBus", error)),
             }
@@ -11166,12 +11168,9 @@ impl Studio {
     }
     pub fn get_vca(&self, path_or_id: &str) -> Result<Vca, Error> {
         unsafe {
+            let c_path_or_id = CString::new(path_or_id)?;
             let mut vca = null_mut();
-            match ffi::FMOD_Studio_System_GetVCA(
-                self.pointer,
-                CString::new(path_or_id)?.as_ptr(),
-                &mut vca,
-            ) {
+            match ffi::FMOD_Studio_System_GetVCA(self.pointer, c_path_or_id.as_ptr(), &mut vca) {
                 ffi::FMOD_OK => Ok(Vca::from(vca)),
                 error => Err(err_fmod!("FMOD_Studio_System_GetVCA", error)),
             }
@@ -11179,12 +11178,9 @@ impl Studio {
     }
     pub fn get_bank(&self, path_or_id: &str) -> Result<Bank, Error> {
         unsafe {
+            let c_path_or_id = CString::new(path_or_id)?;
             let mut bank = null_mut();
-            match ffi::FMOD_Studio_System_GetBank(
-                self.pointer,
-                CString::new(path_or_id)?.as_ptr(),
-                &mut bank,
-            ) {
+            match ffi::FMOD_Studio_System_GetBank(self.pointer, c_path_or_id.as_ptr(), &mut bank) {
                 ffi::FMOD_OK => Ok(Bank::from(bank)),
                 error => Err(err_fmod!("FMOD_Studio_System_GetBank", error)),
             }
@@ -11228,12 +11224,9 @@ impl Studio {
     }
     pub fn get_sound_info(&self, key: &str) -> Result<SoundInfo, Error> {
         unsafe {
+            let c_key = CString::new(key)?;
             let mut info = ffi::FMOD_STUDIO_SOUND_INFO::default();
-            match ffi::FMOD_Studio_System_GetSoundInfo(
-                self.pointer,
-                CString::new(key)?.as_ptr(),
-                &mut info,
-            ) {
+            match ffi::FMOD_Studio_System_GetSoundInfo(self.pointer, c_key.as_ptr(), &mut info) {
                 ffi::FMOD_OK => Ok(SoundInfo::try_from(info)?),
                 error => Err(err_fmod!("FMOD_Studio_System_GetSoundInfo", error)),
             }
@@ -11244,10 +11237,11 @@ impl Studio {
         name: &str,
     ) -> Result<ParameterDescription, Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut parameter = ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION::default();
             match ffi::FMOD_Studio_System_GetParameterDescriptionByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 &mut parameter,
             ) {
                 ffi::FMOD_OK => Ok(ParameterDescription::try_from(parameter)?),
@@ -11284,11 +11278,12 @@ impl Studio {
         size: i32,
     ) -> Result<(String, i32), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let label = CString::from_vec_unchecked(b"".to_vec()).into_raw();
             let mut retrieved = i32::default();
             match ffi::FMOD_Studio_System_GetParameterLabelByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 labelindex,
                 label,
                 size,
@@ -11374,10 +11369,11 @@ impl Studio {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_label = CString::new(label)?;
             match ffi::FMOD_Studio_System_SetParameterByIDWithLabel(
                 self.pointer,
                 id.into(),
-                CString::new(label)?.as_ptr(),
+                c_label.as_ptr(),
                 from_bool!(ignoreseekspeed),
             ) {
                 ffi::FMOD_OK => Ok(()),
@@ -11410,11 +11406,12 @@ impl Studio {
     }
     pub fn get_parameter_by_name(&self, name: &str) -> Result<(f32, f32), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut value = f32::default();
             let mut finalvalue = f32::default();
             match ffi::FMOD_Studio_System_GetParameterByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 &mut value,
                 &mut finalvalue,
             ) {
@@ -11430,9 +11427,10 @@ impl Studio {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             match ffi::FMOD_Studio_System_SetParameterByName(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
+                c_name.as_ptr(),
                 value,
                 from_bool!(ignoreseekspeed),
             ) {
@@ -11448,10 +11446,12 @@ impl Studio {
         ignoreseekspeed: bool,
     ) -> Result<(), Error> {
         unsafe {
+            let c_name = CString::new(name)?;
+            let c_label = CString::new(label)?;
             match ffi::FMOD_Studio_System_SetParameterByNameWithLabel(
                 self.pointer,
-                CString::new(name)?.as_ptr(),
-                CString::new(label)?.as_ptr(),
+                c_name.as_ptr(),
+                c_label.as_ptr(),
                 from_bool!(ignoreseekspeed),
             ) {
                 ffi::FMOD_OK => Ok(()),
@@ -11464,12 +11464,9 @@ impl Studio {
     }
     pub fn lookup_id(&self, path: &str) -> Result<Guid, Error> {
         unsafe {
+            let c_path = CString::new(path)?;
             let mut id = ffi::FMOD_GUID::default();
-            match ffi::FMOD_Studio_System_LookupID(
-                self.pointer,
-                CString::new(path)?.as_ptr(),
-                &mut id,
-            ) {
+            match ffi::FMOD_Studio_System_LookupID(self.pointer, c_path.as_ptr(), &mut id) {
                 ffi::FMOD_OK => Ok(Guid::try_from(id)?),
                 error => Err(err_fmod!("FMOD_Studio_System_LookupID", error)),
             }
@@ -11585,10 +11582,11 @@ impl Studio {
         flags: impl Into<ffi::FMOD_STUDIO_LOAD_BANK_FLAGS>,
     ) -> Result<Bank, Error> {
         unsafe {
+            let c_filename = CString::new(filename)?;
             let mut bank = null_mut();
             match ffi::FMOD_Studio_System_LoadBankFile(
                 self.pointer,
-                CString::new(filename)?.as_ptr(),
+                c_filename.as_ptr(),
                 flags.into(),
                 &mut bank,
             ) {
@@ -11645,10 +11643,8 @@ impl Studio {
     }
     pub fn unregister_plugin(&self, name: &str) -> Result<(), Error> {
         unsafe {
-            match ffi::FMOD_Studio_System_UnregisterPlugin(
-                self.pointer,
-                CString::new(name)?.as_ptr(),
-            ) {
+            let c_name = CString::new(name)?;
+            match ffi::FMOD_Studio_System_UnregisterPlugin(self.pointer, c_name.as_ptr()) {
                 ffi::FMOD_OK => Ok(()),
                 error => Err(err_fmod!("FMOD_Studio_System_UnregisterPlugin", error)),
             }
@@ -11684,9 +11680,10 @@ impl Studio {
         flags: impl Into<ffi::FMOD_STUDIO_COMMANDCAPTURE_FLAGS>,
     ) -> Result<(), Error> {
         unsafe {
+            let c_filename = CString::new(filename)?;
             match ffi::FMOD_Studio_System_StartCommandCapture(
                 self.pointer,
-                CString::new(filename)?.as_ptr(),
+                c_filename.as_ptr(),
                 flags.into(),
             ) {
                 ffi::FMOD_OK => Ok(()),
@@ -11708,10 +11705,11 @@ impl Studio {
         flags: impl Into<ffi::FMOD_STUDIO_COMMANDREPLAY_FLAGS>,
     ) -> Result<CommandReplay, Error> {
         unsafe {
+            let c_filename = CString::new(filename)?;
             let mut replay = null_mut();
             match ffi::FMOD_Studio_System_LoadCommandReplay(
                 self.pointer,
-                CString::new(filename)?.as_ptr(),
+                c_filename.as_ptr(),
                 flags.into(),
                 &mut replay,
             ) {
@@ -12198,7 +12196,8 @@ impl System {
     }
     pub fn set_plugin_path(&self, path: &str) -> Result<(), Error> {
         unsafe {
-            match ffi::FMOD_System_SetPluginPath(self.pointer, CString::new(path)?.as_ptr()) {
+            let c_path = CString::new(path)?;
+            match ffi::FMOD_System_SetPluginPath(self.pointer, c_path.as_ptr()) {
                 ffi::FMOD_OK => Ok(()),
                 error => Err(err_fmod!("FMOD_System_SetPluginPath", error)),
             }
@@ -12206,10 +12205,11 @@ impl System {
     }
     pub fn load_plugin(&self, filename: &str, priority: Option<u32>) -> Result<u32, Error> {
         unsafe {
+            let c_filename = CString::new(filename)?;
             let mut handle = u32::default();
             match ffi::FMOD_System_LoadPlugin(
                 self.pointer,
-                CString::new(filename)?.as_ptr(),
+                c_filename.as_ptr(),
                 &mut handle,
                 priority.unwrap_or(0),
             ) {
@@ -12809,11 +12809,11 @@ impl System {
     }
     pub fn create_channel_group(&self, name: Option<String>) -> Result<ChannelGroup, Error> {
         unsafe {
+            let c_name = name.map(|s| CString::new(s)).transpose()?;
             let mut channelgroup = null_mut();
             match ffi::FMOD_System_CreateChannelGroup(
                 self.pointer,
-                name.map(|value| CString::new(value).map(|value| value.as_ptr()))
-                    .unwrap_or(Ok(null_mut()))?,
+                c_name.as_ref().map_or(null_mut(), |s| s.as_ptr()),
                 &mut channelgroup,
             ) {
                 ffi::FMOD_OK => Ok(ChannelGroup::from(channelgroup)),
@@ -12823,12 +12823,10 @@ impl System {
     }
     pub fn create_sound_group(&self, name: &str) -> Result<SoundGroup, Error> {
         unsafe {
+            let c_name = CString::new(name)?;
             let mut soundgroup = null_mut();
-            match ffi::FMOD_System_CreateSoundGroup(
-                self.pointer,
-                CString::new(name)?.as_ptr(),
-                &mut soundgroup,
-            ) {
+            match ffi::FMOD_System_CreateSoundGroup(self.pointer, c_name.as_ptr(), &mut soundgroup)
+            {
                 ffi::FMOD_OK => Ok(SoundGroup::from(soundgroup)),
                 error => Err(err_fmod!("FMOD_System_CreateSoundGroup", error)),
             }
@@ -13143,7 +13141,8 @@ impl System {
     }
     pub fn set_network_proxy(&self, proxy: &str) -> Result<(), Error> {
         unsafe {
-            match ffi::FMOD_System_SetNetworkProxy(self.pointer, CString::new(proxy)?.as_ptr()) {
+            let c_proxy = CString::new(proxy)?;
+            match ffi::FMOD_System_SetNetworkProxy(self.pointer, c_proxy.as_ptr()) {
                 ffi::FMOD_OK => Ok(()),
                 error => Err(err_fmod!("FMOD_System_SetNetworkProxy", error)),
             }
