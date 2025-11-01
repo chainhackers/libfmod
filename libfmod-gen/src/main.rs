@@ -16,8 +16,8 @@ use crate::parsers::{
     fmod_studio, fmod_studio_common,
 };
 use std::path::Path;
-use std::{env, fs};
 use std::process::Command;
+use std::{env, fs};
 
 mod generators;
 mod models;

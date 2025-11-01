@@ -1,7 +1,7 @@
 // Play a sound file with FMOD 2.03.09
 // Run with: cargo run --example play_sound [path/to/sound.wav/mp3/ogg]
 
-use libfmod::{System, Init, Mode, TimeUnit};
+use libfmod::{Init, Mode, System, TimeUnit};
 use std::{env, thread, time::Duration};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -55,7 +55,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let major = (version >> 16) & 0xFF;
     let minor = (version >> 8) & 0xFF;
     let patch = version & 0xFF;
-    println!("✅ FMOD {}.{:02}.{:02} (build {})", major, minor, patch, build);
+    println!(
+        "✅ FMOD {}.{:02}.{:02} (build {})",
+        major, minor, patch, build
+    );
 
     // Initialize system
     system.init(512, Init::NORMAL, None)?;

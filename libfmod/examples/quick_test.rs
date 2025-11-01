@@ -1,7 +1,7 @@
 // Quick test to verify FMOD 2.03.09 integration works
 // Run with: cargo run --example quick_test
 
-use libfmod::{System, Init};
+use libfmod::{Init, System};
 
 fn main() {
     println!("=== FMOD 2.03.09 Quick Test ===\n");
@@ -29,13 +29,19 @@ fn main() {
             let minor = (version >> 8) & 0xFF;
             let patch = version & 0xFF;
 
-            println!("✓ Version {}.{:02}.{:02} (build {})", major, minor, patch, build);
+            println!(
+                "✓ Version {}.{:02}.{:02} (build {})",
+                major, minor, patch, build
+            );
 
             // Verify it's 2.03.x
             if major == 2 && minor == 3 {
                 println!("   ✓ Confirmed FMOD 2.03.x");
             } else {
-                println!("   ⚠ Warning: Expected 2.03.x, got {}.{:02}.{:02}", major, minor, patch);
+                println!(
+                    "   ⚠ Warning: Expected 2.03.x, got {}.{:02}.{:02}",
+                    major, minor, patch
+                );
             }
         }
         Err(e) => {
@@ -95,8 +101,9 @@ fn main() {
         }
         Err(e) => {
             // We expect this to fail if file doesn't exist
-            if format!("{:?}", e).contains("ERR_FILE_NOTFOUND") ||
-               format!("{:?}", e).contains("(23)") {
+            if format!("{:?}", e).contains("ERR_FILE_NOTFOUND")
+                || format!("{:?}", e).contains("(23)")
+            {
                 println!("✓ API works (no test file)");
             } else {
                 println!("⚠ Unexpected error: {:?}", e);

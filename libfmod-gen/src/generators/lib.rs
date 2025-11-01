@@ -489,9 +489,11 @@ fn map_optional(argument: &Argument, api: &Api) -> InArgument {
                 InArgument {
                     param: quote! { #name: Option<String> },
                     input: quote! { #c_name.as_ref().map_or(null_mut(), |s| s.as_ptr()) },
-                    target: Some(quote! { let #c_name = #name.map(|s| CString::new(s)).transpose()?; }),
+                    target: Some(
+                        quote! { let #c_name = #name.map(|s| CString::new(s)).transpose()?; },
+                    ),
                 }
-            },
+            }
             "*mut:void" => InArgument {
                 param: quote! { #name: Option<*mut c_void> },
                 input: quote! { #name.unwrap_or(null_mut()) },
@@ -569,7 +571,7 @@ fn map_input(argument: &Argument, api: &Api) -> InArgument {
                     input: quote! { #c_arg.as_ptr() },
                     target: Some(quote! { let #c_arg = CString::new(#argument)?; }),
                 }
-            },
+            }
             "*mut:void" => InArgument {
                 param: quote! { #argument: *mut c_void },
                 input: quote! { #argument },

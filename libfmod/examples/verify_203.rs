@@ -1,7 +1,7 @@
 // Simple verification that FMOD 2.03.09 works
 // Run with: cargo run --example verify_203
 
-use libfmod::{System, Init};
+use libfmod::{Init, System};
 
 fn main() -> Result<(), libfmod::Error> {
     println!("\n🎵 FMOD 2.03.09 Verification Test\n");

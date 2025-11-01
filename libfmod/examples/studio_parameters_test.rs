@@ -1,7 +1,7 @@
 // Test FMOD Studio real-time parameter control with FMOD 2.03.09
 // Run with: ./run_fmod.sh studio_parameters_test
 
-use libfmod::{Studio, StudioInit, Init, LoadBank, StopMode};
+use libfmod::{Init, LoadBank, StopMode, Studio, StudioInit};
 use std::thread;
 use std::time::Duration;
 
@@ -16,9 +16,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load banks
     let bank_dir = "../libfmod-gen/fmod/20309/api/studio/examples/media/";
     let master = studio.load_bank_file(&format!("{}/Master.bank", bank_dir), LoadBank::NORMAL)?;
-    let strings = studio.load_bank_file(&format!("{}/Master.strings.bank", bank_dir), LoadBank::NORMAL)?;
+    let strings = studio.load_bank_file(
+        &format!("{}/Master.strings.bank", bank_dir),
+        LoadBank::NORMAL,
+    )?;
     let sfx = studio.load_bank_file(&format!("{}/SFX.bank", bank_dir), LoadBank::NORMAL)?;
-    let vehicles = studio.load_bank_file(&format!("{}/Vehicles.bank", bank_dir), LoadBank::NORMAL)?;
+    let vehicles =
+        studio.load_bank_file(&format!("{}/Vehicles.bank", bank_dir), LoadBank::NORMAL)?;
 
     println!("Banks loaded ✓\n");
 
@@ -107,7 +111,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // Set surface parameter
             footstep.set_parameter_by_name("Surface", value, false).ok();
             footstep.set_parameter_by_name("surface", value, false).ok();
-            footstep.set_parameter_by_name("Material", value, false).ok();
+            footstep
+                .set_parameter_by_name("Material", value, false)
+                .ok();
 
             footstep.start()?;
             footstep.release()?;

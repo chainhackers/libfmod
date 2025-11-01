@@ -1,7 +1,7 @@
 // Test FMOD Studio event playback and sound variations with FMOD 2.03.09
 // Run with: ./run_fmod.sh studio_events_test
 
-use libfmod::{Studio, StudioInit, Init, LoadBank, StopMode};
+use libfmod::{Init, LoadBank, StopMode, Studio, StudioInit};
 use std::thread;
 use std::time::Duration;
 
@@ -18,9 +18,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bank_dir = "../libfmod-gen/fmod/20309/api/studio/examples/media/";
 
     let master = studio.load_bank_file(&format!("{}/Master.bank", bank_dir), LoadBank::NORMAL)?;
-    let strings = studio.load_bank_file(&format!("{}/Master.strings.bank", bank_dir), LoadBank::NORMAL)?;
+    let strings = studio.load_bank_file(
+        &format!("{}/Master.strings.bank", bank_dir),
+        LoadBank::NORMAL,
+    )?;
     let sfx = studio.load_bank_file(&format!("{}/SFX.bank", bank_dir), LoadBank::NORMAL)?;
-    let vehicles = studio.load_bank_file(&format!("{}/Vehicles.bank", bank_dir), LoadBank::NORMAL)?;
+    let vehicles =
+        studio.load_bank_file(&format!("{}/Vehicles.bank", bank_dir), LoadBank::NORMAL)?;
     let music = studio.load_bank_file(&format!("{}/Music.bank", bank_dir), LoadBank::NORMAL)?;
 
     println!("✓ Banks loaded\n");

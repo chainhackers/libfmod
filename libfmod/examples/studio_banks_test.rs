@@ -1,7 +1,7 @@
 // Test FMOD Studio bank loading and management with FMOD 2.03.09
 // Run with: ./run_fmod.sh studio_banks_test
 
-use libfmod::{Studio, StudioInit, Init, LoadBank};
+use libfmod::{Init, LoadBank, Studio, StudioInit};
 use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,10 +32,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("   Using test banks instead...");
 
         // Fall back to test banks
-        let master = studio.load_bank_file("./tests/data/Build/Desktop/Master.bank", LoadBank::NORMAL)?;
+        let master =
+            studio.load_bank_file("./tests/data/Build/Desktop/Master.bank", LoadBank::NORMAL)?;
         println!("✓ Loaded test Master.bank");
 
-        let strings = studio.load_bank_file("./tests/data/Build/Desktop/Master.strings.bank", LoadBank::NORMAL)?;
+        let strings = studio.load_bank_file(
+            "./tests/data/Build/Desktop/Master.strings.bank",
+            LoadBank::NORMAL,
+        )?;
         println!("✓ Loaded test Master.strings.bank");
 
         master.unload()?;

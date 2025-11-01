@@ -40,7 +40,8 @@ impl Signature {
 
         if function.name == "FMOD_System_GetVersion" && argument.name == "version" {
             // Set the complete return for both version and buildnumber
-            self.targets.push(quote! { let mut version = u32::default(); });
+            self.targets
+                .push(quote! { let mut version = u32::default(); });
             self.inputs.push(quote! { &mut version });
             self.outputs.clear();
             self.outputs.push(quote! { (version, buildnumber) });
