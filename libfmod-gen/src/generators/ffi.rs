@@ -261,12 +261,9 @@ pub fn generate_structure_union(name: &Ident, union: &Union) -> TokenStream {
     }
 }
 
-pub fn generate_structure(structure: &Structure, api: &Api) -> TokenStream {
+pub fn generate_structure(structure: &Structure, _api: &Api) -> TokenStream {
     let name = format_ident!("{}", structure.name);
-    let fields = structure.fields
-        .iter()
-        .filter(|field| !api.should_skip_field(&structure.name, &field.name))
-        .map(generate_field);
+    let fields = structure.fields.iter().map(generate_field);
     let default = generate_structure_default(&structure);
     match &structure.union {
         None => {
@@ -338,7 +335,6 @@ pub fn generate_preset(structure: &Structure, preset: &Preset) -> Result<TokenSt
         };
     })
 }
-
 
 pub fn generate_ffi_code(api: &Api) -> Result<TokenStream, Error> {
     let opaque_types: Vec<TokenStream> =

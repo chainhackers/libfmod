@@ -1,6 +1,6 @@
 // Phase 3.2: Test Version API for FMOD 2.03.09
 
-use libfmod::{System, Error};
+use libfmod::{Error, System};
 
 #[test]
 fn test_get_version_new_api() {
@@ -20,5 +20,8 @@ fn test_get_version_new_api() {
     assert_eq!(major, 2, "Expected major version 2, got {}", major);
     assert_eq!(minor, 3, "Expected minor version 3, got {}", minor);
 
-    println!("✓ Version API works: {}.{}.{} (build {})", major, minor, patch, build);
+    println!(
+        "✓ Version API works: {}.{}.{} (build {})",
+        major, minor, patch, build
+    );
 }

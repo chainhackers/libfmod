@@ -1,6 +1,6 @@
 // Phase 3.3: Test System Initialization for FMOD 2.03.09
 
-use libfmod::{System, Init, Error};
+use libfmod::{Error, Init, System};
 
 #[test]
 fn test_system_init() {
