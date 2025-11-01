@@ -17,10 +17,10 @@ libfmod = "~2.222"
 
 Choose one of FMOD supported versions:
 
-| libfmod | FMOD    | Status | End of life |
-|---------|---------|--------|-------------|
-| 2.222   | 2.02.22 | active |             | 
-| 2.206   | 2.02.06 | frozen | 2024-09-03  |
+| libfmod | FMOD    | Status |
+|---------|---------|--------|
+| dev     | 2.03.09 | active |
+| 2.222   | 2.02.22 | frozen |
 
 Active: new features, bugfixes, and security fixes are accepted, new crates are still released.
 
@@ -118,6 +118,22 @@ fn test_playing_sound() -> Result<(), Error> {
 ```
 
 See more examples in [tests](libfmod/tests) folder.
+
+### Interactive Demos
+
+For interactive demos and feature demonstrations, see the separate **[libfmod-demos](https://github.com/chainhackers/libfmod-demos)** repository:
+
+- **harness_demo** - Non-interactive demonstrations of 3D audio, spatial positioning, parameters, and events
+- **interactive_harness** - Real-time keyboard-controlled testing with 3D audio positioning
+- **play_sound** - Simple audio file playback
+- Plus comprehensive test suites for Studio banks, events, and parameters
+
+```bash
+# Clone and run demos
+git clone https://github.com/chainhackers/libfmod-demos
+cd libfmod-demos
+./run_demos.sh harness_demo
+```
 
 ### Contributing
 
