@@ -6,7 +6,7 @@ use libfmod::ffi::{
     FMOD_SYSTEM_CALLBACK_PREUPDATE,
 };
 use libfmod::{
-    ffi, AdvancedSettings, CreateSoundexInfo, DspResampler, Error, Mode, OpenState, Sound, Studio,
+    ffi, AdvancedSettings, CreateSoundexInfo, DspResampler, Error, Mode, OpenState, Studio,
     StudioAdvancedSettings, System,
 };
 

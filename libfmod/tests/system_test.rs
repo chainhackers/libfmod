@@ -1,6 +1,6 @@
 // Phase 3.1: Test System Creation for FMOD 2.03.09
 
-use libfmod::{Error, System};
+use libfmod::System;
 
 #[test]
 fn test_system_create() {

@@ -1,6 +1,6 @@
 // Phase 3.2: Test Version API for FMOD 2.03.09
 
-use libfmod::{Error, System};
+use libfmod::System;
 
 #[test]
 fn test_get_version_new_api() {
