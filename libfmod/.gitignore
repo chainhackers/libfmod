@@ -7,10 +7,3 @@ Cargo.lock
 .idea
 .DS_Store
 .cargo/
-
-# Helper scripts (move to separate demos repo)
-run_fmod.sh
-
-# Demo examples (move to separate demos repo)
-examples/harness_demo.rs
-examples/interactive_harness.rs
