@@ -59,7 +59,10 @@ return_type = { FundamentalType | UserType}
 varargs = { "," ~ "..." }
 Callback = { "typedef" ~ return_type ~ pointer? ~ ("(F_CALLBACK *" | "(F_CALL *") ~ name ~ ")" ~ "(" ~ arguments ~ varargs?  ~ ")" ~  ";" }
 
-Macros = {"#define" ~ name ~ "(" ~ (!"#end" ~ ANY)* }
+// Handle multi-line macros with line continuations and token pasting
+line_continuation = _{ "\\" ~ WHITESPACE* ~ NEWLINE }
+macro_body_char = _{ line_continuation | (!"#define" ~ !EOI ~ ANY) }
+Macros = { "#define" ~ name ~ "(" ~ macro_body_char* }
 
 declaration = _{
     OpaqueType |

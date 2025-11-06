@@ -6,6 +6,3 @@ Cargo.lock
 .idea
 .DS_Store
 fmod
-
-# Temporary preprocessing script (TODO: move to parser grammar)
-preprocess_headers.sh
