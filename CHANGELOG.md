@@ -1,15 +1,15 @@
 # Changelog
 
-## [Unreleased] - 2024-09-25
+## [Unreleased] - 2025-11-06
 
 ### Added
 - Support for FMOD 2.03.09
-- `play_sound` example with progress tracking
-- `run_fmod.sh` convenience script
+- Parser grammar support for variadic macros with `##__VA_ARGS__`
+- Integration test for macro parsing
 
 ### Changed
 - `System::getVersion()` returns `(version, buildnumber)` tuple
-- Field filtering for removed/renamed structure fields
+- Generator uses patching system for removed/renamed structure fields
 
 ### Breaking Changes
 - `System::getVersion()` signature changed
