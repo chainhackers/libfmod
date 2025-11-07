@@ -6,8 +6,8 @@ use quote::quote;
 
 use crate::models::Type::FundamentalType;
 use crate::models::{
-    Api, Argument, Callback, Constant, Enumeration, Error, ErrorStringMapping, Field, Flags,
-    Function, OpaqueType, Pointer, Preset, Structure, Type, TypeAlias, Union,
+    Api, Argument, Callback, Constant, Enumeration, Error, Field, Flags, Function, OpaqueType,
+    Pointer, Preset, Structure, Type, TypeAlias, Union,
 };
 
 impl From<ParseIntError> for Error {
@@ -384,6 +384,7 @@ pub fn generate_ffi_code(api: &Api) -> Result<TokenStream, Error> {
         #![allow(non_camel_case_types)]
         #![allow(non_snake_case)]
         #![allow(unused_parens)]
+        #![allow(clippy::unnecessary_cast)]
         use std::os::raw::{c_char, c_float, c_int, c_longlong, c_short, c_uchar, c_uint, c_ulonglong, c_ushort, c_void};
 
         #(#opaque_types)*

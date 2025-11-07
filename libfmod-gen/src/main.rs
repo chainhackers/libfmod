@@ -194,7 +194,6 @@ fn generate_lib_fmod(source: &str, destination: &str) -> Result<(), Error> {
 const FMOD_SDK_PATH: &str = "./fmod/20309";
 const OUTPUT_DIR: &str = "../libfmod";
 const FMOD_VERSION: &str = "2.03.09";
-const EXPECTED_VERSION: u32 = 0x00020309;
 
 fn main() {
     println!("libfmod-gen for FMOD {}", FMOD_VERSION);

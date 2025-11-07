@@ -1,4 +1,5 @@
 #![allow(unused_unsafe)]
+#![allow(clippy::unnecessary_cast)]
 use std::ffi::{c_void, CStr, CString, IntoStringError, NulError};
 use std::fmt::{Display, Formatter};
 use std::mem::size_of;
