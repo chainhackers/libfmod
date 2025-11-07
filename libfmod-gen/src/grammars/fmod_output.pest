@@ -59,7 +59,8 @@ return_type = { FundamentalType | UserType}
 varargs = { "," ~ "..." }
 Callback = { "typedef" ~ return_type ~ pointer? ~ ("(F_CALLBACK *" | "(F_CALL *") ~ name ~ ")" ~ "(" ~ arguments ~ varargs?  ~ ")" ~  ";" }
 
-// Handle multi-line macros with line continuations and token pasting
+// FMOD 2.03.09 introduced variadic logging macros (FMOD_OUTPUT_LOG) with line continuations
+// and token pasting (##__VA_ARGS__). These rules parse them without bash preprocessing.
 line_continuation = _{ "\\" ~ WHITESPACE* ~ NEWLINE }
 macro_body_char = _{ line_continuation | (!"#define" ~ !EOI ~ ANY) }
 Macros = { "#define" ~ name ~ "(" ~ macro_body_char* }
