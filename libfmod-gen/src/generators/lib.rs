@@ -12,18 +12,6 @@ use crate::models::{
     Api, Argument, Enumeration, Error, Field, Function, Modifier, Pointer, Structure, Type,
 };
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Struct {
-    pub structure: Structure,
-    pub constructor: Function,
-    pub methods: Vec<Function>,
-}
-
-#[derive(Debug, Default)]
-pub struct Lib {
-    pub structs: Vec<Struct>,
-}
-
 fn extract_struct_key(name: &str) -> String {
     match name.rfind('_') {
         Some(index) => name[..index].to_uppercase(),
@@ -288,24 +276,24 @@ pub fn generate_into_field(structure: &str, field: &Field, api: &Api) -> TokenSt
         Some(expression) => expression,
         _ => match &field.field_type {
             FundamentalType(name) => match (ptr, &name[..]) {
-                ("*const", "char") => quote! { move_string_to_c!(self.#self_name) },
-                ("*mut", "char") => quote! { move_string_to_c!(self.#self_name) as *mut _ },
-                _ => quote! { self.#self_name },
+                ("*const", "char") => quote! { move_string_to_c!(value.#self_name) },
+                ("*mut", "char") => quote! { move_string_to_c!(value.#self_name) as *mut _ },
+                _ => quote! { value.#self_name },
             },
             UserType(name) => match (ptr, api.describe_user_type(name)) {
                 ("*mut", UserTypeDesc::OpaqueType) => {
-                    quote! { self.#self_name.as_mut_ptr() }
+                    quote! { value.#self_name.as_mut_ptr() }
                 }
                 ("*mut", UserTypeDesc::Structure) => {
-                    quote! { &mut self.#self_name.into() }
+                    quote! { &mut value.#self_name.into() }
                 }
                 ("", UserTypeDesc::Structure) => {
-                    quote! { self.#self_name.into() }
+                    quote! { value.#self_name.into() }
                 }
                 ("", UserTypeDesc::Enumeration) => {
-                    quote! { self.#self_name.into() }
+                    quote! { value.#self_name.into() }
                 }
-                _ => quote! { self.#self_name },
+                _ => quote! { value.#self_name },
             },
         },
     };
@@ -349,13 +337,13 @@ pub fn generate_structure_into(structure: &Structure, api: &Api) -> TokenStream 
         .iter()
         .map(|field| generate_into_field(&structure.name, field, api));
     let union = if structure.union.is_some() {
-        Some(quote! { ,union: self.union })
+        Some(quote! { ,union: value.union })
     } else {
         None
     };
     quote! {
-        impl Into<ffi::#ident> for #name {
-            fn into(self) -> ffi::#ident {
+        impl From<#name> for ffi::#ident {
+            fn from(value: #name) -> ffi::#ident {
                 ffi::#ident {
                     #(#conversion),*
                     #union

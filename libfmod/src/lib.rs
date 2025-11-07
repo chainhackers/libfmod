@@ -3817,16 +3817,16 @@ impl TryFrom<ffi::FMOD_STUDIO_BANK_INFO> for BankInfo {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_BANK_INFO> for BankInfo {
-    fn into(self) -> ffi::FMOD_STUDIO_BANK_INFO {
+impl From<BankInfo> for ffi::FMOD_STUDIO_BANK_INFO {
+    fn from(value: BankInfo) -> ffi::FMOD_STUDIO_BANK_INFO {
         ffi::FMOD_STUDIO_BANK_INFO {
-            size: self.size,
-            userdata: self.userdata,
-            userdatalength: self.userdatalength,
-            opencallback: self.opencallback,
-            closecallback: self.closecallback,
-            readcallback: self.readcallback,
-            seekcallback: self.seekcallback,
+            size: value.size,
+            userdata: value.userdata,
+            userdatalength: value.userdatalength,
+            opencallback: value.opencallback,
+            closecallback: value.closecallback,
+            readcallback: value.readcallback,
+            seekcallback: value.seekcallback,
         }
     }
 }
@@ -3846,11 +3846,11 @@ impl TryFrom<ffi::FMOD_STUDIO_PARAMETER_ID> for ParameterId {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_PARAMETER_ID> for ParameterId {
-    fn into(self) -> ffi::FMOD_STUDIO_PARAMETER_ID {
+impl From<ParameterId> for ffi::FMOD_STUDIO_PARAMETER_ID {
+    fn from(value: ParameterId) -> ffi::FMOD_STUDIO_PARAMETER_ID {
         ffi::FMOD_STUDIO_PARAMETER_ID {
-            data1: self.data_1,
-            data2: self.data_2,
+            data1: value.data_1,
+            data2: value.data_2,
         }
     }
 }
@@ -3882,17 +3882,17 @@ impl TryFrom<ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION> for ParameterDescription {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION> for ParameterDescription {
-    fn into(self) -> ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
+impl From<ParameterDescription> for ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
+    fn from(value: ParameterDescription) -> ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
         ffi::FMOD_STUDIO_PARAMETER_DESCRIPTION {
-            name: move_string_to_c!(self.name),
-            id: self.id.into(),
-            minimum: self.minimum,
-            maximum: self.maximum,
-            defaultvalue: self.defaultvalue,
-            type_: self.type_.into(),
-            flags: self.flags,
-            guid: self.guid.into(),
+            name: move_string_to_c!(value.name),
+            id: value.id.into(),
+            minimum: value.minimum,
+            maximum: value.maximum,
+            defaultvalue: value.defaultvalue,
+            type_: value.type_.into(),
+            flags: value.flags,
+            guid: value.guid.into(),
         }
     }
 }
@@ -3914,12 +3914,12 @@ impl TryFrom<ffi::FMOD_STUDIO_USER_PROPERTY> for UserProperty {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_USER_PROPERTY> for UserProperty {
-    fn into(self) -> ffi::FMOD_STUDIO_USER_PROPERTY {
+impl From<UserProperty> for ffi::FMOD_STUDIO_USER_PROPERTY {
+    fn from(value: UserProperty) -> ffi::FMOD_STUDIO_USER_PROPERTY {
         ffi::FMOD_STUDIO_USER_PROPERTY {
-            name: move_string_to_c!(self.name),
-            type_: self.type_.into(),
-            union: self.union,
+            name: move_string_to_c!(value.name),
+            type_: value.type_.into(),
+            union: value.union,
         }
     }
 }
@@ -3941,12 +3941,12 @@ impl TryFrom<ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES> for ProgrammerSoundPr
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES> for ProgrammerSoundProperties {
-    fn into(self) -> ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
+impl From<ProgrammerSoundProperties> for ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
+    fn from(value: ProgrammerSoundProperties) -> ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
         ffi::FMOD_STUDIO_PROGRAMMER_SOUND_PROPERTIES {
-            name: move_string_to_c!(self.name),
-            sound: self.sound.as_mut_ptr(),
-            subsoundIndex: self.subsound_index,
+            name: move_string_to_c!(value.name),
+            sound: value.sound.as_mut_ptr(),
+            subsoundIndex: value.subsound_index,
         }
     }
 }
@@ -3966,11 +3966,11 @@ impl TryFrom<ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES> for PluginInstanceProp
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES> for PluginInstanceProperties {
-    fn into(self) -> ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
+impl From<PluginInstanceProperties> for ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
+    fn from(value: PluginInstanceProperties) -> ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
         ffi::FMOD_STUDIO_PLUGIN_INSTANCE_PROPERTIES {
-            name: move_string_to_c!(self.name),
-            dsp: self.dsp.as_mut_ptr(),
+            name: move_string_to_c!(value.name),
+            dsp: value.dsp.as_mut_ptr(),
         }
     }
 }
@@ -3990,11 +3990,11 @@ impl TryFrom<ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES> for TimelineMarkerProp
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES> for TimelineMarkerProperties {
-    fn into(self) -> ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
+impl From<TimelineMarkerProperties> for ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
+    fn from(value: TimelineMarkerProperties) -> ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
         ffi::FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES {
-            name: move_string_to_c!(self.name),
-            position: self.position,
+            name: move_string_to_c!(value.name),
+            position: value.position,
         }
     }
 }
@@ -4022,15 +4022,15 @@ impl TryFrom<ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES> for TimelineBeatProperti
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES> for TimelineBeatProperties {
-    fn into(self) -> ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES {
+impl From<TimelineBeatProperties> for ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES {
+    fn from(value: TimelineBeatProperties) -> ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES {
         ffi::FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES {
-            bar: self.bar,
-            beat: self.beat,
-            position: self.position,
-            tempo: self.tempo,
-            timesignatureupper: self.timesignatureupper,
-            timesignaturelower: self.timesignaturelower,
+            bar: value.bar,
+            beat: value.beat,
+            position: value.position,
+            tempo: value.tempo,
+            timesignatureupper: value.timesignatureupper,
+            timesignaturelower: value.timesignaturelower,
         }
     }
 }
@@ -4052,11 +4052,13 @@ impl TryFrom<ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES> for TimelineNeste
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES> for TimelineNestedBeatProperties {
-    fn into(self) -> ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES {
+impl From<TimelineNestedBeatProperties> for ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES {
+    fn from(
+        value: TimelineNestedBeatProperties,
+    ) -> ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES {
         ffi::FMOD_STUDIO_TIMELINE_NESTED_BEAT_PROPERTIES {
-            eventid: self.eventid.into(),
-            properties: self.properties.into(),
+            eventid: value.eventid.into(),
+            properties: value.properties.into(),
         }
     }
 }
@@ -4084,16 +4086,16 @@ impl TryFrom<ffi::FMOD_STUDIO_ADVANCEDSETTINGS> for StudioAdvancedSettings {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_ADVANCEDSETTINGS> for StudioAdvancedSettings {
-    fn into(self) -> ffi::FMOD_STUDIO_ADVANCEDSETTINGS {
+impl From<StudioAdvancedSettings> for ffi::FMOD_STUDIO_ADVANCEDSETTINGS {
+    fn from(value: StudioAdvancedSettings) -> ffi::FMOD_STUDIO_ADVANCEDSETTINGS {
         ffi::FMOD_STUDIO_ADVANCEDSETTINGS {
             cbsize: size_of::<ffi::FMOD_STUDIO_ADVANCEDSETTINGS>() as i32,
-            commandqueuesize: self.commandqueuesize,
-            handleinitialsize: self.handleinitialsize,
-            studioupdateperiod: self.studioupdateperiod,
-            idlesampledatapoolsize: self.idlesampledatapoolsize,
-            streamingscheduledelay: self.streamingscheduledelay,
-            encryptionkey: move_string_to_c!(self.encryptionkey),
+            commandqueuesize: value.commandqueuesize,
+            handleinitialsize: value.handleinitialsize,
+            studioupdateperiod: value.studioupdateperiod,
+            idlesampledatapoolsize: value.idlesampledatapoolsize,
+            streamingscheduledelay: value.streamingscheduledelay,
+            encryptionkey: move_string_to_c!(value.encryptionkey),
         }
     }
 }
@@ -4111,10 +4113,10 @@ impl TryFrom<ffi::FMOD_STUDIO_CPU_USAGE> for StudioCpuUsage {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_CPU_USAGE> for StudioCpuUsage {
-    fn into(self) -> ffi::FMOD_STUDIO_CPU_USAGE {
+impl From<StudioCpuUsage> for ffi::FMOD_STUDIO_CPU_USAGE {
+    fn from(value: StudioCpuUsage) -> ffi::FMOD_STUDIO_CPU_USAGE {
         ffi::FMOD_STUDIO_CPU_USAGE {
-            update: self.update,
+            update: value.update,
         }
     }
 }
@@ -4140,14 +4142,14 @@ impl TryFrom<ffi::FMOD_STUDIO_BUFFER_INFO> for BufferInfo {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_BUFFER_INFO> for BufferInfo {
-    fn into(self) -> ffi::FMOD_STUDIO_BUFFER_INFO {
+impl From<BufferInfo> for ffi::FMOD_STUDIO_BUFFER_INFO {
+    fn from(value: BufferInfo) -> ffi::FMOD_STUDIO_BUFFER_INFO {
         ffi::FMOD_STUDIO_BUFFER_INFO {
-            currentusage: self.currentusage,
-            peakusage: self.peakusage,
-            capacity: self.capacity,
-            stallcount: self.stallcount,
-            stalltime: self.stalltime,
+            currentusage: value.currentusage,
+            peakusage: value.peakusage,
+            capacity: value.capacity,
+            stallcount: value.stallcount,
+            stalltime: value.stalltime,
         }
     }
 }
@@ -4167,11 +4169,11 @@ impl TryFrom<ffi::FMOD_STUDIO_BUFFER_USAGE> for BufferUsage {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_BUFFER_USAGE> for BufferUsage {
-    fn into(self) -> ffi::FMOD_STUDIO_BUFFER_USAGE {
+impl From<BufferUsage> for ffi::FMOD_STUDIO_BUFFER_USAGE {
+    fn from(value: BufferUsage) -> ffi::FMOD_STUDIO_BUFFER_USAGE {
         ffi::FMOD_STUDIO_BUFFER_USAGE {
-            studiocommandqueue: self.studiocommandqueue.into(),
-            studiohandle: self.studiohandle.into(),
+            studiocommandqueue: value.studiocommandqueue.into(),
+            studiohandle: value.studiohandle.into(),
         }
     }
 }
@@ -4195,13 +4197,13 @@ impl TryFrom<ffi::FMOD_STUDIO_SOUND_INFO> for SoundInfo {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_SOUND_INFO> for SoundInfo {
-    fn into(self) -> ffi::FMOD_STUDIO_SOUND_INFO {
+impl From<SoundInfo> for ffi::FMOD_STUDIO_SOUND_INFO {
+    fn from(value: SoundInfo) -> ffi::FMOD_STUDIO_SOUND_INFO {
         ffi::FMOD_STUDIO_SOUND_INFO {
-            name_or_data: move_string_to_c!(self.name_or_data),
-            mode: self.mode,
-            exinfo: self.exinfo.into(),
-            subsoundindex: self.subsoundindex,
+            name_or_data: move_string_to_c!(value.name_or_data),
+            mode: value.mode,
+            exinfo: value.exinfo.into(),
+            subsoundindex: value.subsoundindex,
         }
     }
 }
@@ -4233,17 +4235,17 @@ impl TryFrom<ffi::FMOD_STUDIO_COMMAND_INFO> for CommandInfo {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_COMMAND_INFO> for CommandInfo {
-    fn into(self) -> ffi::FMOD_STUDIO_COMMAND_INFO {
+impl From<CommandInfo> for ffi::FMOD_STUDIO_COMMAND_INFO {
+    fn from(value: CommandInfo) -> ffi::FMOD_STUDIO_COMMAND_INFO {
         ffi::FMOD_STUDIO_COMMAND_INFO {
-            commandname: move_string_to_c!(self.commandname),
-            parentcommandindex: self.parentcommandindex,
-            framenumber: self.framenumber,
-            frametime: self.frametime,
-            instancetype: self.instancetype.into(),
-            outputtype: self.outputtype.into(),
-            instancehandle: self.instancehandle,
-            outputhandle: self.outputhandle,
+            commandname: move_string_to_c!(value.commandname),
+            parentcommandindex: value.parentcommandindex,
+            framenumber: value.framenumber,
+            frametime: value.frametime,
+            instancetype: value.instancetype.into(),
+            outputtype: value.outputtype.into(),
+            instancehandle: value.instancehandle,
+            outputhandle: value.outputhandle,
         }
     }
 }
@@ -4265,12 +4267,12 @@ impl TryFrom<ffi::FMOD_STUDIO_MEMORY_USAGE> for MemoryUsage {
         }
     }
 }
-impl Into<ffi::FMOD_STUDIO_MEMORY_USAGE> for MemoryUsage {
-    fn into(self) -> ffi::FMOD_STUDIO_MEMORY_USAGE {
+impl From<MemoryUsage> for ffi::FMOD_STUDIO_MEMORY_USAGE {
+    fn from(value: MemoryUsage) -> ffi::FMOD_STUDIO_MEMORY_USAGE {
         ffi::FMOD_STUDIO_MEMORY_USAGE {
-            exclusive: self.exclusive,
-            inclusive: self.inclusive,
-            sampledata: self.sampledata,
+            exclusive: value.exclusive,
+            inclusive: value.inclusive,
+            sampledata: value.sampledata,
         }
     }
 }
@@ -4302,17 +4304,17 @@ impl TryFrom<ffi::FMOD_ASYNCREADINFO> for AsyncReadInfo {
         }
     }
 }
-impl Into<ffi::FMOD_ASYNCREADINFO> for AsyncReadInfo {
-    fn into(self) -> ffi::FMOD_ASYNCREADINFO {
+impl From<AsyncReadInfo> for ffi::FMOD_ASYNCREADINFO {
+    fn from(value: AsyncReadInfo) -> ffi::FMOD_ASYNCREADINFO {
         ffi::FMOD_ASYNCREADINFO {
-            handle: self.handle,
-            offset: self.offset,
-            sizebytes: self.sizebytes,
-            priority: self.priority,
-            userdata: self.userdata,
-            buffer: self.buffer,
-            bytesread: self.bytesread,
-            done: self.done,
+            handle: value.handle,
+            offset: value.offset,
+            sizebytes: value.sizebytes,
+            priority: value.priority,
+            userdata: value.userdata,
+            buffer: value.buffer,
+            bytesread: value.bytesread,
+            done: value.done,
         }
     }
 }
@@ -4367,12 +4369,12 @@ impl From<Vector> for (f32, f32, f32) {
         (value.x, value.y, value.z)
     }
 }
-impl Into<ffi::FMOD_VECTOR> for Vector {
-    fn into(self) -> ffi::FMOD_VECTOR {
+impl From<Vector> for ffi::FMOD_VECTOR {
+    fn from(value: Vector) -> ffi::FMOD_VECTOR {
         ffi::FMOD_VECTOR {
-            x: self.x,
-            y: self.y,
-            z: self.z,
+            x: value.x,
+            y: value.y,
+            z: value.z,
         }
     }
 }
@@ -4396,13 +4398,13 @@ impl TryFrom<ffi::FMOD_3D_ATTRIBUTES> for Attributes3d {
         }
     }
 }
-impl Into<ffi::FMOD_3D_ATTRIBUTES> for Attributes3d {
-    fn into(self) -> ffi::FMOD_3D_ATTRIBUTES {
+impl From<Attributes3d> for ffi::FMOD_3D_ATTRIBUTES {
+    fn from(value: Attributes3d) -> ffi::FMOD_3D_ATTRIBUTES {
         ffi::FMOD_3D_ATTRIBUTES {
-            position: self.position.into(),
-            velocity: self.velocity.into(),
-            forward: self.forward.into(),
-            up: self.up.into(),
+            position: value.position.into(),
+            velocity: value.velocity.into(),
+            forward: value.forward.into(),
+            up: value.up.into(),
         }
     }
 }
@@ -4437,13 +4439,13 @@ impl Guid {
         }
     }
 }
-impl Into<ffi::FMOD_GUID> for Guid {
-    fn into(self) -> ffi::FMOD_GUID {
+impl From<Guid> for ffi::FMOD_GUID {
+    fn from(value: Guid) -> ffi::FMOD_GUID {
         ffi::FMOD_GUID {
-            Data1: self.data_1,
-            Data2: self.data_2,
-            Data3: self.data_3,
-            Data4: self.data_4,
+            Data1: value.data_1,
+            Data2: value.data_2,
+            Data3: value.data_3,
+            Data4: value.data_4,
         }
     }
 }
@@ -4463,11 +4465,11 @@ impl TryFrom<ffi::FMOD_PLUGINLIST> for PluginList {
         }
     }
 }
-impl Into<ffi::FMOD_PLUGINLIST> for PluginList {
-    fn into(self) -> ffi::FMOD_PLUGINLIST {
+impl From<PluginList> for ffi::FMOD_PLUGINLIST {
+    fn from(value: PluginList) -> ffi::FMOD_PLUGINLIST {
         ffi::FMOD_PLUGINLIST {
-            type_: self.type_.into(),
-            description: self.description,
+            type_: value.type_.into(),
+            description: value.description,
         }
     }
 }
@@ -4533,31 +4535,31 @@ impl TryFrom<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
         }
     }
 }
-impl Into<ffi::FMOD_ADVANCEDSETTINGS> for AdvancedSettings {
-    fn into(self) -> ffi::FMOD_ADVANCEDSETTINGS {
+impl From<AdvancedSettings> for ffi::FMOD_ADVANCEDSETTINGS {
+    fn from(value: AdvancedSettings) -> ffi::FMOD_ADVANCEDSETTINGS {
         ffi::FMOD_ADVANCEDSETTINGS {
             cbSize: size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
-            maxMPEGCodecs: self.max_mpeg_codecs,
-            maxADPCMCodecs: self.max_adpcm_codecs,
-            maxXMACodecs: self.max_xma_codecs,
-            maxVorbisCodecs: self.max_vorbis_codecs,
-            maxAT9Codecs: self.max_at_9_codecs,
-            maxFADPCMCodecs: self.max_fadpcm_codecs,
-            maxOpusCodecs: self.max_opus_codecs,
-            ASIONumChannels: self.asio_num_channels,
-            ASIOChannelList: vec_as_mut_ptr(self.asio_channel_list, |val| val.as_ptr()).cast(),
-            ASIOSpeakerList: vec_as_mut_ptr(self.asio_speaker_list, |val| val.into()),
-            vol0virtualvol: self.vol_0_virtualvol,
-            defaultDecodeBufferSize: self.default_decode_buffer_size,
-            profilePort: self.profile_port,
-            geometryMaxFadeTime: self.geometry_max_fade_time,
-            distanceFilterCenterFreq: self.distance_filter_center_freq,
-            reverb3Dinstance: self.reverb_3_d_instance,
-            DSPBufferPoolSize: self.dsp_buffer_pool_size,
-            resamplerMethod: self.resampler_method.into(),
-            randomSeed: self.random_seed,
-            maxConvolutionThreads: self.max_convolution_threads,
-            maxSpatialObjects: self.max_spatial_objects,
+            maxMPEGCodecs: value.max_mpeg_codecs,
+            maxADPCMCodecs: value.max_adpcm_codecs,
+            maxXMACodecs: value.max_xma_codecs,
+            maxVorbisCodecs: value.max_vorbis_codecs,
+            maxAT9Codecs: value.max_at_9_codecs,
+            maxFADPCMCodecs: value.max_fadpcm_codecs,
+            maxOpusCodecs: value.max_opus_codecs,
+            ASIONumChannels: value.asio_num_channels,
+            ASIOChannelList: vec_as_mut_ptr(value.asio_channel_list, |val| val.as_ptr()).cast(),
+            ASIOSpeakerList: vec_as_mut_ptr(value.asio_speaker_list, |val| val.into()),
+            vol0virtualvol: value.vol_0_virtualvol,
+            defaultDecodeBufferSize: value.default_decode_buffer_size,
+            profilePort: value.profile_port,
+            geometryMaxFadeTime: value.geometry_max_fade_time,
+            distanceFilterCenterFreq: value.distance_filter_center_freq,
+            reverb3Dinstance: value.reverb_3_d_instance,
+            DSPBufferPoolSize: value.dsp_buffer_pool_size,
+            resamplerMethod: value.resampler_method.into(),
+            randomSeed: value.random_seed,
+            maxConvolutionThreads: value.max_convolution_threads,
+            maxSpatialObjects: value.max_spatial_objects,
         }
     }
 }
@@ -4585,15 +4587,15 @@ impl TryFrom<ffi::FMOD_TAG> for Tag {
         }
     }
 }
-impl Into<ffi::FMOD_TAG> for Tag {
-    fn into(self) -> ffi::FMOD_TAG {
+impl From<Tag> for ffi::FMOD_TAG {
+    fn from(value: Tag) -> ffi::FMOD_TAG {
         ffi::FMOD_TAG {
-            type_: self.type_.into(),
-            datatype: self.datatype.into(),
-            name: move_string_to_c!(self.name) as *mut _,
-            data: self.data,
-            datalen: self.datalen,
-            updated: self.updated,
+            type_: value.type_.into(),
+            datatype: value.datatype.into(),
+            name: move_string_to_c!(value.name) as *mut _,
+            data: value.data,
+            datalen: value.datalen,
+            updated: value.updated,
         }
     }
 }
@@ -4688,54 +4690,56 @@ impl Default for CreateSoundexInfo {
         Self::try_from(ffi::FMOD_CREATESOUNDEXINFO::default()).unwrap()
     }
 }
-impl Into<ffi::FMOD_CREATESOUNDEXINFO> for CreateSoundexInfo {
-    fn into(self) -> ffi::FMOD_CREATESOUNDEXINFO {
+impl From<CreateSoundexInfo> for ffi::FMOD_CREATESOUNDEXINFO {
+    fn from(value: CreateSoundexInfo) -> ffi::FMOD_CREATESOUNDEXINFO {
         ffi::FMOD_CREATESOUNDEXINFO {
             cbsize: size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
-            length: self.length,
-            fileoffset: self.fileoffset,
-            numchannels: self.numchannels,
-            defaultfrequency: self.defaultfrequency,
-            format: self.format.into(),
-            decodebuffersize: self.decodebuffersize,
-            initialsubsound: self.initialsubsound,
-            numsubsounds: self.numsubsounds,
-            inclusionlist: opt_ptr!(self.inclusionlist.clone(), |v| v.as_slice().as_ptr()
+            length: value.length,
+            fileoffset: value.fileoffset,
+            numchannels: value.numchannels,
+            defaultfrequency: value.defaultfrequency,
+            format: value.format.into(),
+            decodebuffersize: value.decodebuffersize,
+            initialsubsound: value.initialsubsound,
+            numsubsounds: value.numsubsounds,
+            inclusionlist: opt_ptr!(value.inclusionlist.clone(), |v| v.as_slice().as_ptr()
                 as *mut _),
-            inclusionlistnum: self.inclusionlist.map(|v| v.len()).unwrap_or(0) as _,
-            pcmreadcallback: self.pcmreadcallback,
-            pcmsetposcallback: self.pcmsetposcallback,
-            nonblockcallback: self.nonblockcallback,
+            inclusionlistnum: value.inclusionlist.map(|v| v.len()).unwrap_or(0) as _,
+            pcmreadcallback: value.pcmreadcallback,
+            pcmsetposcallback: value.pcmsetposcallback,
+            nonblockcallback: value.nonblockcallback,
             dlsname: opt_ptr!(
-                self.dlsname
+                value
+                    .dlsname
                     .map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())),
                 |v| v.as_ptr()
             ),
             encryptionkey: opt_ptr!(
-                self.encryptionkey
+                value
+                    .encryptionkey
                     .map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())),
                 |v| v.as_ptr()
             ),
-            maxpolyphony: self.maxpolyphony,
-            userdata: self.userdata,
-            suggestedsoundtype: self.suggestedsoundtype.into(),
-            fileuseropen: self.fileuseropen,
-            fileuserclose: self.fileuserclose,
-            fileuserread: self.fileuserread,
-            fileuserseek: self.fileuserseek,
-            fileuserasyncread: self.fileuserasyncread,
-            fileuserasynccancel: self.fileuserasynccancel,
-            fileuserdata: self.fileuserdata,
-            filebuffersize: self.filebuffersize,
-            channelorder: self.channelorder.into(),
-            initialsoundgroup: opt_ptr!(self.initialsoundgroup, |v| v.as_mut_ptr()),
-            initialseekposition: self.initialseekposition,
-            initialseekpostype: self.initialseekpostype,
-            ignoresetfilesystem: self.ignoresetfilesystem,
-            audioqueuepolicy: self.audioqueuepolicy,
-            minmidigranularity: self.minmidigranularity,
-            nonblockthreadid: self.nonblockthreadid,
-            fsbguid: opt_ptr!(self.fsbguid, |v| &mut v.into() as *mut _),
+            maxpolyphony: value.maxpolyphony,
+            userdata: value.userdata,
+            suggestedsoundtype: value.suggestedsoundtype.into(),
+            fileuseropen: value.fileuseropen,
+            fileuserclose: value.fileuserclose,
+            fileuserread: value.fileuserread,
+            fileuserseek: value.fileuserseek,
+            fileuserasyncread: value.fileuserasyncread,
+            fileuserasynccancel: value.fileuserasynccancel,
+            fileuserdata: value.fileuserdata,
+            filebuffersize: value.filebuffersize,
+            channelorder: value.channelorder.into(),
+            initialsoundgroup: opt_ptr!(value.initialsoundgroup, |v| v.as_mut_ptr()),
+            initialseekposition: value.initialseekposition,
+            initialseekpostype: value.initialseekpostype,
+            ignoresetfilesystem: value.ignoresetfilesystem,
+            audioqueuepolicy: value.audioqueuepolicy,
+            minmidigranularity: value.minmidigranularity,
+            nonblockthreadid: value.nonblockthreadid,
+            fsbguid: opt_ptr!(value.fsbguid, |v| &mut v.into() as *mut _),
         }
     }
 }
@@ -4873,21 +4877,21 @@ impl TryFrom<ffi::FMOD_REVERB_PROPERTIES> for ReverbProperties {
         }
     }
 }
-impl Into<ffi::FMOD_REVERB_PROPERTIES> for ReverbProperties {
-    fn into(self) -> ffi::FMOD_REVERB_PROPERTIES {
+impl From<ReverbProperties> for ffi::FMOD_REVERB_PROPERTIES {
+    fn from(value: ReverbProperties) -> ffi::FMOD_REVERB_PROPERTIES {
         ffi::FMOD_REVERB_PROPERTIES {
-            DecayTime: self.decay_time,
-            EarlyDelay: self.early_delay,
-            LateDelay: self.late_delay,
-            HFReference: self.hf_reference,
-            HFDecayRatio: self.hf_decay_ratio,
-            Diffusion: self.diffusion,
-            Density: self.density,
-            LowShelfFrequency: self.low_shelf_frequency,
-            LowShelfGain: self.low_shelf_gain,
-            HighCut: self.high_cut,
-            EarlyLateMix: self.early_late_mix,
-            WetLevel: self.wet_level,
+            DecayTime: value.decay_time,
+            EarlyDelay: value.early_delay,
+            LateDelay: value.late_delay,
+            HFReference: value.hf_reference,
+            HFDecayRatio: value.hf_decay_ratio,
+            Diffusion: value.diffusion,
+            Density: value.density,
+            LowShelfFrequency: value.low_shelf_frequency,
+            LowShelfGain: value.low_shelf_gain,
+            HighCut: value.high_cut,
+            EarlyLateMix: value.early_late_mix,
+            WetLevel: value.wet_level,
         }
     }
 }
@@ -4913,14 +4917,14 @@ impl TryFrom<ffi::FMOD_ERRORCALLBACK_INFO> for ErrorCallbackInfo {
         }
     }
 }
-impl Into<ffi::FMOD_ERRORCALLBACK_INFO> for ErrorCallbackInfo {
-    fn into(self) -> ffi::FMOD_ERRORCALLBACK_INFO {
+impl From<ErrorCallbackInfo> for ffi::FMOD_ERRORCALLBACK_INFO {
+    fn from(value: ErrorCallbackInfo) -> ffi::FMOD_ERRORCALLBACK_INFO {
         ffi::FMOD_ERRORCALLBACK_INFO {
-            result: self.result.into(),
-            instancetype: self.instancetype.into(),
-            instance: self.instance,
-            functionname: move_string_to_c!(self.functionname),
-            functionparams: move_string_to_c!(self.functionparams),
+            result: value.result.into(),
+            instancetype: value.instancetype.into(),
+            instance: value.instance,
+            functionname: move_string_to_c!(value.functionname),
+            functionparams: move_string_to_c!(value.functionparams),
         }
     }
 }
@@ -4948,15 +4952,15 @@ impl TryFrom<ffi::FMOD_CPU_USAGE> for CpuUsage {
         }
     }
 }
-impl Into<ffi::FMOD_CPU_USAGE> for CpuUsage {
-    fn into(self) -> ffi::FMOD_CPU_USAGE {
+impl From<CpuUsage> for ffi::FMOD_CPU_USAGE {
+    fn from(value: CpuUsage) -> ffi::FMOD_CPU_USAGE {
         ffi::FMOD_CPU_USAGE {
-            dsp: self.dsp,
-            stream: self.stream,
-            geometry: self.geometry,
-            update: self.update,
-            convolution1: self.convolution_1,
-            convolution2: self.convolution_2,
+            dsp: value.dsp,
+            stream: value.stream,
+            geometry: value.geometry,
+            update: value.update,
+            convolution1: value.convolution_1,
+            convolution2: value.convolution_2,
         }
     }
 }
@@ -4978,12 +4982,12 @@ impl TryFrom<ffi::FMOD_DSP_DATA_PARAMETER_INFO> for DspDataParameterInfo {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_DATA_PARAMETER_INFO> for DspDataParameterInfo {
-    fn into(self) -> ffi::FMOD_DSP_DATA_PARAMETER_INFO {
+impl From<DspDataParameterInfo> for ffi::FMOD_DSP_DATA_PARAMETER_INFO {
+    fn from(value: DspDataParameterInfo) -> ffi::FMOD_DSP_DATA_PARAMETER_INFO {
         ffi::FMOD_DSP_DATA_PARAMETER_INFO {
-            data: self.data,
-            length: self.length,
-            index: self.index,
+            data: value.data,
+            length: value.length,
+            index: value.index,
         }
     }
 }
@@ -5025,22 +5029,22 @@ impl TryFrom<ffi::FMOD_CODEC_DESCRIPTION> for CodecDescription {
         }
     }
 }
-impl Into<ffi::FMOD_CODEC_DESCRIPTION> for CodecDescription {
-    fn into(self) -> ffi::FMOD_CODEC_DESCRIPTION {
+impl From<CodecDescription> for ffi::FMOD_CODEC_DESCRIPTION {
+    fn from(value: CodecDescription) -> ffi::FMOD_CODEC_DESCRIPTION {
         ffi::FMOD_CODEC_DESCRIPTION {
-            apiversion: self.apiversion,
-            name: move_string_to_c!(self.name),
-            version: self.version,
-            defaultasstream: self.defaultasstream,
-            timeunits: self.timeunits,
-            open: self.open,
-            close: self.close,
-            read: self.read,
-            getlength: self.getlength,
-            setposition: self.setposition,
-            getposition: self.getposition,
-            soundcreate: self.soundcreate,
-            getwaveformat: self.getwaveformat,
+            apiversion: value.apiversion,
+            name: move_string_to_c!(value.name),
+            version: value.version,
+            defaultasstream: value.defaultasstream,
+            timeunits: value.timeunits,
+            open: value.open,
+            close: value.close,
+            read: value.read,
+            getlength: value.getlength,
+            setposition: value.setposition,
+            getposition: value.getposition,
+            soundcreate: value.soundcreate,
+            getwaveformat: value.getwaveformat,
         }
     }
 }
@@ -5082,22 +5086,22 @@ impl TryFrom<ffi::FMOD_CODEC_WAVEFORMAT> for CodecWaveformat {
         }
     }
 }
-impl Into<ffi::FMOD_CODEC_WAVEFORMAT> for CodecWaveformat {
-    fn into(self) -> ffi::FMOD_CODEC_WAVEFORMAT {
+impl From<CodecWaveformat> for ffi::FMOD_CODEC_WAVEFORMAT {
+    fn from(value: CodecWaveformat) -> ffi::FMOD_CODEC_WAVEFORMAT {
         ffi::FMOD_CODEC_WAVEFORMAT {
-            name: move_string_to_c!(self.name),
-            format: self.format.into(),
-            channels: self.channels,
-            frequency: self.frequency,
-            lengthbytes: self.lengthbytes,
-            lengthpcm: self.lengthpcm,
-            pcmblocksize: self.pcmblocksize,
-            loopstart: self.loopstart,
-            loopend: self.loopend,
-            mode: self.mode,
-            channelmask: self.channelmask,
-            channelorder: self.channelorder.into(),
-            peakvolume: self.peakvolume,
+            name: move_string_to_c!(value.name),
+            format: value.format.into(),
+            channels: value.channels,
+            frequency: value.frequency,
+            lengthbytes: value.lengthbytes,
+            lengthpcm: value.lengthpcm,
+            pcmblocksize: value.pcmblocksize,
+            loopstart: value.loopstart,
+            loopend: value.loopend,
+            mode: value.mode,
+            channelmask: value.channelmask,
+            channelorder: value.channelorder.into(),
+            peakvolume: value.peakvolume,
         }
     }
 }
@@ -5129,17 +5133,17 @@ impl TryFrom<ffi::FMOD_CODEC_STATE_FUNCTIONS> for CodecStateFunctions {
         }
     }
 }
-impl Into<ffi::FMOD_CODEC_STATE_FUNCTIONS> for CodecStateFunctions {
-    fn into(self) -> ffi::FMOD_CODEC_STATE_FUNCTIONS {
+impl From<CodecStateFunctions> for ffi::FMOD_CODEC_STATE_FUNCTIONS {
+    fn from(value: CodecStateFunctions) -> ffi::FMOD_CODEC_STATE_FUNCTIONS {
         ffi::FMOD_CODEC_STATE_FUNCTIONS {
-            metadata: self.metadata,
-            alloc: self.alloc,
-            free: self.free,
-            log: self.log,
-            read: self.read,
-            seek: self.seek,
-            tell: self.tell,
-            size: self.size,
+            metadata: value.metadata,
+            alloc: value.alloc,
+            free: value.free,
+            log: value.log,
+            read: value.read,
+            seek: value.seek,
+            tell: value.tell,
+            size: value.size,
         }
     }
 }
@@ -5163,13 +5167,13 @@ impl TryFrom<ffi::FMOD_CODEC_STATE> for CodecState {
         }
     }
 }
-impl Into<ffi::FMOD_CODEC_STATE> for CodecState {
-    fn into(self) -> ffi::FMOD_CODEC_STATE {
+impl From<CodecState> for ffi::FMOD_CODEC_STATE {
+    fn from(value: CodecState) -> ffi::FMOD_CODEC_STATE {
         ffi::FMOD_CODEC_STATE {
-            plugindata: self.plugindata,
-            waveformat: &mut self.waveformat.into(),
-            functions: &mut self.functions.into(),
-            numsubsounds: self.numsubsounds,
+            plugindata: value.plugindata,
+            waveformat: &mut value.waveformat.into(),
+            functions: &mut value.functions.into(),
+            numsubsounds: value.numsubsounds,
         }
     }
 }
@@ -5225,29 +5229,29 @@ impl TryFrom<ffi::FMOD_OUTPUT_DESCRIPTION> for OutputDescription {
         }
     }
 }
-impl Into<ffi::FMOD_OUTPUT_DESCRIPTION> for OutputDescription {
-    fn into(self) -> ffi::FMOD_OUTPUT_DESCRIPTION {
+impl From<OutputDescription> for ffi::FMOD_OUTPUT_DESCRIPTION {
+    fn from(value: OutputDescription) -> ffi::FMOD_OUTPUT_DESCRIPTION {
         ffi::FMOD_OUTPUT_DESCRIPTION {
-            apiversion: self.apiversion,
-            name: move_string_to_c!(self.name),
-            version: self.version,
-            method: self.method,
-            getnumdrivers: self.getnumdrivers,
-            getdriverinfo: self.getdriverinfo,
-            init: self.init,
-            start: self.start,
-            stop: self.stop,
-            close: self.close,
-            update: self.update,
-            gethandle: self.gethandle,
-            mixer: self.mixer,
-            object3dgetinfo: self.object_3_dgetinfo,
-            object3dalloc: self.object_3_dalloc,
-            object3dfree: self.object_3_dfree,
-            object3dupdate: self.object_3_dupdate,
-            openport: self.openport,
-            closeport: self.closeport,
-            devicelistchanged: self.devicelistchanged,
+            apiversion: value.apiversion,
+            name: move_string_to_c!(value.name),
+            version: value.version,
+            method: value.method,
+            getnumdrivers: value.getnumdrivers,
+            getdriverinfo: value.getdriverinfo,
+            init: value.init,
+            start: value.start,
+            stop: value.stop,
+            close: value.close,
+            update: value.update,
+            gethandle: value.gethandle,
+            mixer: value.mixer,
+            object3dgetinfo: value.object_3_dgetinfo,
+            object3dalloc: value.object_3_dalloc,
+            object3dfree: value.object_3_dfree,
+            object3dupdate: value.object_3_dupdate,
+            openport: value.openport,
+            closeport: value.closeport,
+            devicelistchanged: value.devicelistchanged,
         }
     }
 }
@@ -5277,16 +5281,16 @@ impl TryFrom<ffi::FMOD_OUTPUT_STATE> for OutputState {
         }
     }
 }
-impl Into<ffi::FMOD_OUTPUT_STATE> for OutputState {
-    fn into(self) -> ffi::FMOD_OUTPUT_STATE {
+impl From<OutputState> for ffi::FMOD_OUTPUT_STATE {
+    fn from(value: OutputState) -> ffi::FMOD_OUTPUT_STATE {
         ffi::FMOD_OUTPUT_STATE {
-            plugindata: self.plugindata,
-            readfrommixer: self.readfrommixer,
-            alloc: self.alloc,
-            free: self.free,
-            log: self.log,
-            copyport: self.copyport,
-            requestreset: self.requestreset,
+            plugindata: value.plugindata,
+            readfrommixer: value.readfrommixer,
+            alloc: value.alloc,
+            free: value.free,
+            log: value.log,
+            copyport: value.copyport,
+            requestreset: value.requestreset,
         }
     }
 }
@@ -5314,15 +5318,15 @@ impl TryFrom<ffi::FMOD_OUTPUT_OBJECT3DINFO> for OutputObject3Dinfo {
         }
     }
 }
-impl Into<ffi::FMOD_OUTPUT_OBJECT3DINFO> for OutputObject3Dinfo {
-    fn into(self) -> ffi::FMOD_OUTPUT_OBJECT3DINFO {
+impl From<OutputObject3Dinfo> for ffi::FMOD_OUTPUT_OBJECT3DINFO {
+    fn from(value: OutputObject3Dinfo) -> ffi::FMOD_OUTPUT_OBJECT3DINFO {
         ffi::FMOD_OUTPUT_OBJECT3DINFO {
-            buffer: self.buffer.as_ptr() as *mut _,
-            bufferlength: self.bufferlength,
-            position: self.position.into(),
-            gain: self.gain,
-            spread: self.spread,
-            priority: self.priority,
+            buffer: value.buffer.as_ptr() as *mut _,
+            bufferlength: value.bufferlength,
+            position: value.position.into(),
+            gain: value.gain,
+            spread: value.spread,
+            priority: value.priority,
         }
     }
 }
@@ -5348,14 +5352,14 @@ impl TryFrom<ffi::FMOD_DSP_BUFFER_ARRAY> for DspBufferArray {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_BUFFER_ARRAY> for DspBufferArray {
-    fn into(self) -> ffi::FMOD_DSP_BUFFER_ARRAY {
+impl From<DspBufferArray> for ffi::FMOD_DSP_BUFFER_ARRAY {
+    fn from(value: DspBufferArray) -> ffi::FMOD_DSP_BUFFER_ARRAY {
         ffi::FMOD_DSP_BUFFER_ARRAY {
-            numbuffers: self.numbuffers,
-            buffernumchannels: self.buffernumchannels.as_ptr() as *mut _,
-            bufferchannelmask: self.bufferchannelmask.as_ptr() as *mut _,
-            buffers: self.buffers.as_ptr() as *mut _,
-            speakermode: self.speakermode.into(),
+            numbuffers: value.numbuffers,
+            buffernumchannels: value.buffernumchannels.as_ptr() as *mut _,
+            bufferchannelmask: value.bufferchannelmask.as_ptr() as *mut _,
+            buffers: value.buffers.as_ptr() as *mut _,
+            speakermode: value.speakermode.into(),
         }
     }
 }
@@ -5375,11 +5379,11 @@ impl TryFrom<ffi::FMOD_COMPLEX> for Complex {
         }
     }
 }
-impl Into<ffi::FMOD_COMPLEX> for Complex {
-    fn into(self) -> ffi::FMOD_COMPLEX {
+impl From<Complex> for ffi::FMOD_COMPLEX {
+    fn from(value: Complex) -> ffi::FMOD_COMPLEX {
         ffi::FMOD_COMPLEX {
-            real: self.real,
-            imag: self.imag,
+            real: value.real,
+            imag: value.imag,
         }
     }
 }
@@ -5405,14 +5409,16 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR>
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR>
-    for DspParameterFloatMappingPiecewiseLinear
+impl From<DspParameterFloatMappingPiecewiseLinear>
+    for ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR
 {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR {
+    fn from(
+        value: DspParameterFloatMappingPiecewiseLinear,
+    ) -> ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR {
         ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR {
-            numpoints: self.numpoints,
-            pointparamvalues: self.pointparamvalues.as_ptr() as *mut _,
-            pointpositions: self.pointpositions.as_ptr() as *mut _,
+            numpoints: value.numpoints,
+            pointparamvalues: value.pointparamvalues.as_ptr() as *mut _,
+            pointpositions: value.pointpositions.as_ptr() as *mut _,
         }
     }
 }
@@ -5434,11 +5440,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING> for DspParameterFloatMapping
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING> for DspParameterFloatMapping {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING {
+impl From<DspParameterFloatMapping> for ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING {
+    fn from(value: DspParameterFloatMapping) -> ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING {
         ffi::FMOD_DSP_PARAMETER_FLOAT_MAPPING {
-            type_: self.type_.into(),
-            piecewiselinearmapping: self.piecewiselinearmapping.into(),
+            type_: value.type_.into(),
+            piecewiselinearmapping: value.piecewiselinearmapping.into(),
         }
     }
 }
@@ -5462,13 +5468,13 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DESC_FLOAT> for DspParameterDescFloat {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DESC_FLOAT> for DspParameterDescFloat {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DESC_FLOAT {
+impl From<DspParameterDescFloat> for ffi::FMOD_DSP_PARAMETER_DESC_FLOAT {
+    fn from(value: DspParameterDescFloat) -> ffi::FMOD_DSP_PARAMETER_DESC_FLOAT {
         ffi::FMOD_DSP_PARAMETER_DESC_FLOAT {
-            min: self.min,
-            max: self.max,
-            defaultval: self.defaultval,
-            mapping: self.mapping.into(),
+            min: value.min,
+            max: value.max,
+            defaultval: value.defaultval,
+            mapping: value.mapping.into(),
         }
     }
 }
@@ -5494,14 +5500,14 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DESC_INT> for DspParameterDescInt {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DESC_INT> for DspParameterDescInt {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DESC_INT {
+impl From<DspParameterDescInt> for ffi::FMOD_DSP_PARAMETER_DESC_INT {
+    fn from(value: DspParameterDescInt) -> ffi::FMOD_DSP_PARAMETER_DESC_INT {
         ffi::FMOD_DSP_PARAMETER_DESC_INT {
-            min: self.min,
-            max: self.max,
-            defaultval: self.defaultval,
-            goestoinf: self.goestoinf,
-            valuenames: self.valuenames.as_ptr() as *mut _,
+            min: value.min,
+            max: value.max,
+            defaultval: value.defaultval,
+            goestoinf: value.goestoinf,
+            valuenames: value.valuenames.as_ptr() as *mut _,
         }
     }
 }
@@ -5521,11 +5527,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DESC_BOOL> for DspParameterDescBool {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DESC_BOOL> for DspParameterDescBool {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DESC_BOOL {
+impl From<DspParameterDescBool> for ffi::FMOD_DSP_PARAMETER_DESC_BOOL {
+    fn from(value: DspParameterDescBool) -> ffi::FMOD_DSP_PARAMETER_DESC_BOOL {
         ffi::FMOD_DSP_PARAMETER_DESC_BOOL {
-            defaultval: self.defaultval,
-            valuenames: self.valuenames.as_ptr() as *mut _,
+            defaultval: value.defaultval,
+            valuenames: value.valuenames.as_ptr() as *mut _,
         }
     }
 }
@@ -5543,10 +5549,10 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DESC_DATA> for DspParameterDescData {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DESC_DATA> for DspParameterDescData {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DESC_DATA {
+impl From<DspParameterDescData> for ffi::FMOD_DSP_PARAMETER_DESC_DATA {
+    fn from(value: DspParameterDescData) -> ffi::FMOD_DSP_PARAMETER_DESC_DATA {
         ffi::FMOD_DSP_PARAMETER_DESC_DATA {
-            datatype: self.datatype,
+            datatype: value.datatype,
         }
     }
 }
@@ -5572,14 +5578,14 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DESC> for DspParameterDesc {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DESC> for DspParameterDesc {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DESC {
+impl From<DspParameterDesc> for ffi::FMOD_DSP_PARAMETER_DESC {
+    fn from(value: DspParameterDesc) -> ffi::FMOD_DSP_PARAMETER_DESC {
         ffi::FMOD_DSP_PARAMETER_DESC {
-            type_: self.type_.into(),
-            name: self.name,
-            label: self.label,
-            description: move_string_to_c!(self.description),
-            union: self.union,
+            type_: value.type_.into(),
+            name: value.name,
+            label: value.label,
+            description: move_string_to_c!(value.description),
+            union: value.union,
         }
     }
 }
@@ -5599,11 +5605,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_OVERALLGAIN> for DspParameterOverallgain {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_OVERALLGAIN> for DspParameterOverallgain {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_OVERALLGAIN {
+impl From<DspParameterOverallgain> for ffi::FMOD_DSP_PARAMETER_OVERALLGAIN {
+    fn from(value: DspParameterOverallgain) -> ffi::FMOD_DSP_PARAMETER_OVERALLGAIN {
         ffi::FMOD_DSP_PARAMETER_OVERALLGAIN {
-            linear_gain: self.linear_gain,
-            linear_gain_additive: self.linear_gain_additive,
+            linear_gain: value.linear_gain,
+            linear_gain_additive: value.linear_gain_additive,
         }
     }
 }
@@ -5623,11 +5629,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES> for DspParameterAttributes3d 
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES> for DspParameterAttributes3d {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES {
+impl From<DspParameterAttributes3d> for ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES {
+    fn from(value: DspParameterAttributes3d) -> ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES {
         ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES {
-            relative: self.relative.into(),
-            absolute: self.absolute.into(),
+            relative: value.relative.into(),
+            absolute: value.absolute.into(),
         }
     }
 }
@@ -5657,13 +5663,13 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI> for DspParameterAttribu
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI> for DspParameterAttributes3dMulti {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI {
+impl From<DspParameterAttributes3dMulti> for ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI {
+    fn from(value: DspParameterAttributes3dMulti) -> ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI {
         ffi::FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI {
-            numlisteners: self.numlisteners,
-            relative: self.relative.map(Attributes3d::into),
-            weight: self.weight,
-            absolute: self.absolute.into(),
+            numlisteners: value.numlisteners,
+            relative: value.relative.map(Attributes3d::into),
+            weight: value.weight,
+            absolute: value.absolute.into(),
         }
     }
 }
@@ -5683,11 +5689,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE> for DspParameterAttenuat
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE> for DspParameterAttenuationRange {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE {
+impl From<DspParameterAttenuationRange> for ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE {
+    fn from(value: DspParameterAttenuationRange) -> ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE {
         ffi::FMOD_DSP_PARAMETER_ATTENUATION_RANGE {
-            min: self.min,
-            max: self.max,
+            min: value.min,
+            max: value.max,
         }
     }
 }
@@ -5705,10 +5711,10 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_SIDECHAIN> for DspParameterSidechain {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_SIDECHAIN> for DspParameterSidechain {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_SIDECHAIN {
+impl From<DspParameterSidechain> for ffi::FMOD_DSP_PARAMETER_SIDECHAIN {
+    fn from(value: DspParameterSidechain) -> ffi::FMOD_DSP_PARAMETER_SIDECHAIN {
         ffi::FMOD_DSP_PARAMETER_SIDECHAIN {
-            sidechainenable: self.sidechainenable,
+            sidechainenable: value.sidechainenable,
         }
     }
 }
@@ -5743,11 +5749,11 @@ impl TryFrom<Dsp> for DspParameterFft {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_FFT> for DspParameterFft {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_FFT {
+impl From<DspParameterFft> for ffi::FMOD_DSP_PARAMETER_FFT {
+    fn from(value: DspParameterFft) -> ffi::FMOD_DSP_PARAMETER_FFT {
         ffi::FMOD_DSP_PARAMETER_FFT {
-            length: self.length,
-            numchannels: self.spectrum.len() as i32,
+            length: value.length,
+            numchannels: value.spectrum.len() as i32,
             spectrum: [null_mut(); 32],
         }
     }
@@ -5768,11 +5774,11 @@ impl TryFrom<ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE> for DspParameterDynamicRe
         }
     }
 }
-impl Into<ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE> for DspParameterDynamicResponse {
-    fn into(self) -> ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
+impl From<DspParameterDynamicResponse> for ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
+    fn from(value: DspParameterDynamicResponse) -> ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
         ffi::FMOD_DSP_PARAMETER_DYNAMIC_RESPONSE {
-            numchannels: self.numchannels,
-            rms: self.rms,
+            numchannels: value.numchannels,
+            rms: value.rms,
         }
     }
 }
@@ -5842,37 +5848,37 @@ impl TryFrom<ffi::FMOD_DSP_DESCRIPTION> for DspDescription {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_DESCRIPTION> for DspDescription {
-    fn into(self) -> ffi::FMOD_DSP_DESCRIPTION {
+impl From<DspDescription> for ffi::FMOD_DSP_DESCRIPTION {
+    fn from(value: DspDescription) -> ffi::FMOD_DSP_DESCRIPTION {
         ffi::FMOD_DSP_DESCRIPTION {
-            pluginsdkversion: self.pluginsdkversion,
-            name: self.name,
-            version: self.version,
-            numinputbuffers: self.numinputbuffers,
-            numoutputbuffers: self.numoutputbuffers,
-            create: self.create,
-            release: self.release,
-            reset: self.reset,
-            read: self.read,
-            process: self.process,
-            setposition: self.setposition,
-            numparameters: self.paramdesc.len() as i32,
-            paramdesc: vec_as_mut_ptr(self.paramdesc, |param| {
+            pluginsdkversion: value.pluginsdkversion,
+            name: value.name,
+            version: value.version,
+            numinputbuffers: value.numinputbuffers,
+            numoutputbuffers: value.numoutputbuffers,
+            create: value.create,
+            release: value.release,
+            reset: value.reset,
+            read: value.read,
+            process: value.process,
+            setposition: value.setposition,
+            numparameters: value.paramdesc.len() as i32,
+            paramdesc: vec_as_mut_ptr(value.paramdesc, |param| {
                 Box::leak(Box::new(param.into())) as *mut _
             }),
-            setparameterfloat: self.setparameterfloat,
-            setparameterint: self.setparameterint,
-            setparameterbool: self.setparameterbool,
-            setparameterdata: self.setparameterdata,
-            getparameterfloat: self.getparameterfloat,
-            getparameterint: self.getparameterint,
-            getparameterbool: self.getparameterbool,
-            getparameterdata: self.getparameterdata,
-            shouldiprocess: self.shouldiprocess,
-            userdata: self.userdata,
-            sys_register: self.sys_register,
-            sys_deregister: self.sys_deregister,
-            sys_mix: self.sys_mix,
+            setparameterfloat: value.setparameterfloat,
+            setparameterint: value.setparameterint,
+            setparameterbool: value.setparameterbool,
+            setparameterdata: value.setparameterdata,
+            getparameterfloat: value.getparameterfloat,
+            getparameterint: value.getparameterint,
+            getparameterbool: value.getparameterbool,
+            getparameterdata: value.getparameterdata,
+            shouldiprocess: value.shouldiprocess,
+            userdata: value.userdata,
+            sys_register: value.sys_register,
+            sys_deregister: value.sys_deregister,
+            sys_mix: value.sys_mix,
         }
     }
 }
@@ -5892,11 +5898,11 @@ impl TryFrom<ffi::FMOD_DSP_STATE_DFT_FUNCTIONS> for DspStateDftFunctions {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_STATE_DFT_FUNCTIONS> for DspStateDftFunctions {
-    fn into(self) -> ffi::FMOD_DSP_STATE_DFT_FUNCTIONS {
+impl From<DspStateDftFunctions> for ffi::FMOD_DSP_STATE_DFT_FUNCTIONS {
+    fn from(value: DspStateDftFunctions) -> ffi::FMOD_DSP_STATE_DFT_FUNCTIONS {
         ffi::FMOD_DSP_STATE_DFT_FUNCTIONS {
-            fftreal: self.fftreal,
-            inversefftreal: self.inversefftreal,
+            fftreal: value.fftreal,
+            inversefftreal: value.inversefftreal,
         }
     }
 }
@@ -5924,15 +5930,15 @@ impl TryFrom<ffi::FMOD_DSP_STATE_PAN_FUNCTIONS> for DspStatePanFunctions {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_STATE_PAN_FUNCTIONS> for DspStatePanFunctions {
-    fn into(self) -> ffi::FMOD_DSP_STATE_PAN_FUNCTIONS {
+impl From<DspStatePanFunctions> for ffi::FMOD_DSP_STATE_PAN_FUNCTIONS {
+    fn from(value: DspStatePanFunctions) -> ffi::FMOD_DSP_STATE_PAN_FUNCTIONS {
         ffi::FMOD_DSP_STATE_PAN_FUNCTIONS {
-            summonomatrix: self.summonomatrix,
-            sumstereomatrix: self.sumstereomatrix,
-            sumsurroundmatrix: self.sumsurroundmatrix,
-            summonotosurroundmatrix: self.summonotosurroundmatrix,
-            sumstereotosurroundmatrix: self.sumstereotosurroundmatrix,
-            getrolloffgain: self.getrolloffgain,
+            summonomatrix: value.summonomatrix,
+            sumstereomatrix: value.sumstereomatrix,
+            sumsurroundmatrix: value.sumsurroundmatrix,
+            summonotosurroundmatrix: value.summonotosurroundmatrix,
+            sumstereotosurroundmatrix: value.sumstereotosurroundmatrix,
+            getrolloffgain: value.getrolloffgain,
         }
     }
 }
@@ -5972,21 +5978,21 @@ impl TryFrom<ffi::FMOD_DSP_STATE_FUNCTIONS> for DspStateFunctions {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_STATE_FUNCTIONS> for DspStateFunctions {
-    fn into(self) -> ffi::FMOD_DSP_STATE_FUNCTIONS {
+impl From<DspStateFunctions> for ffi::FMOD_DSP_STATE_FUNCTIONS {
+    fn from(value: DspStateFunctions) -> ffi::FMOD_DSP_STATE_FUNCTIONS {
         ffi::FMOD_DSP_STATE_FUNCTIONS {
-            alloc: self.alloc,
-            realloc: self.realloc,
-            free: self.free,
-            getsamplerate: self.getsamplerate,
-            getblocksize: self.getblocksize,
-            dft: &mut self.dft.into(),
-            pan: &mut self.pan.into(),
-            getspeakermode: self.getspeakermode,
-            getclock: self.getclock,
-            getlistenerattributes: self.getlistenerattributes,
-            log: self.log,
-            getuserdata: self.getuserdata,
+            alloc: value.alloc,
+            realloc: value.realloc,
+            free: value.free,
+            getsamplerate: value.getsamplerate,
+            getblocksize: value.getblocksize,
+            dft: &mut value.dft.into(),
+            pan: &mut value.pan.into(),
+            getspeakermode: value.getspeakermode,
+            getclock: value.getclock,
+            getlistenerattributes: value.getlistenerattributes,
+            log: value.log,
+            getuserdata: value.getuserdata,
         }
     }
 }
@@ -6018,17 +6024,17 @@ impl TryFrom<ffi::FMOD_DSP_STATE> for DspState {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_STATE> for DspState {
-    fn into(self) -> ffi::FMOD_DSP_STATE {
+impl From<DspState> for ffi::FMOD_DSP_STATE {
+    fn from(value: DspState) -> ffi::FMOD_DSP_STATE {
         ffi::FMOD_DSP_STATE {
-            instance: self.instance,
-            plugindata: self.plugindata,
-            channelmask: self.channelmask,
-            source_speakermode: self.source_speakermode.into(),
-            sidechaindata: self.sidechaindata.as_ptr() as *mut _,
-            sidechainchannels: self.sidechainchannels,
-            functions: &mut self.functions.into(),
-            systemobject: self.systemobject,
+            instance: value.instance,
+            plugindata: value.plugindata,
+            channelmask: value.channelmask,
+            source_speakermode: value.source_speakermode.into(),
+            sidechaindata: value.sidechaindata.as_ptr() as *mut _,
+            sidechainchannels: value.sidechainchannels,
+            functions: &mut value.functions.into(),
+            systemobject: value.systemobject,
         }
     }
 }
@@ -6052,13 +6058,13 @@ impl TryFrom<ffi::FMOD_DSP_METERING_INFO> for DspMeteringInfo {
         }
     }
 }
-impl Into<ffi::FMOD_DSP_METERING_INFO> for DspMeteringInfo {
-    fn into(self) -> ffi::FMOD_DSP_METERING_INFO {
+impl From<DspMeteringInfo> for ffi::FMOD_DSP_METERING_INFO {
+    fn from(value: DspMeteringInfo) -> ffi::FMOD_DSP_METERING_INFO {
         ffi::FMOD_DSP_METERING_INFO {
-            numsamples: self.numsamples,
-            peaklevel: self.peaklevel,
-            rmslevel: self.rmslevel,
-            numchannels: self.numchannels,
+            numsamples: value.numsamples,
+            peaklevel: value.peaklevel,
+            rmslevel: value.rmslevel,
+            numchannels: value.numchannels,
         }
     }
 }
@@ -6090,17 +6096,17 @@ impl TryFrom<ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE> for DspLoudnessMeterInfoTyp
         }
     }
 }
-impl Into<ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE> for DspLoudnessMeterInfoType {
-    fn into(self) -> ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE {
+impl From<DspLoudnessMeterInfoType> for ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE {
+    fn from(value: DspLoudnessMeterInfoType) -> ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE {
         ffi::FMOD_DSP_LOUDNESS_METER_INFO_TYPE {
-            momentaryloudness: self.momentaryloudness,
-            shorttermloudness: self.shorttermloudness,
-            integratedloudness: self.integratedloudness,
-            loudness10thpercentile: self.loudness_10_thpercentile,
-            loudness95thpercentile: self.loudness_95_thpercentile,
-            loudnesshistogram: self.loudnesshistogram,
-            maxtruepeak: self.maxtruepeak,
-            maxmomentaryloudness: self.maxmomentaryloudness,
+            momentaryloudness: value.momentaryloudness,
+            shorttermloudness: value.shorttermloudness,
+            integratedloudness: value.integratedloudness,
+            loudness10thpercentile: value.loudness_10_thpercentile,
+            loudness95thpercentile: value.loudness_95_thpercentile,
+            loudnesshistogram: value.loudnesshistogram,
+            maxtruepeak: value.maxtruepeak,
+            maxmomentaryloudness: value.maxmomentaryloudness,
         }
     }
 }
@@ -6118,10 +6124,10 @@ impl TryFrom<ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE> for DspLoudnessMeterWe
         }
     }
 }
-impl Into<ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE> for DspLoudnessMeterWeightingType {
-    fn into(self) -> ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE {
+impl From<DspLoudnessMeterWeightingType> for ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE {
+    fn from(value: DspLoudnessMeterWeightingType) -> ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE {
         ffi::FMOD_DSP_LOUDNESS_METER_WEIGHTING_TYPE {
-            channelweight: self.channelweight,
+            channelweight: value.channelweight,
         }
     }
 }

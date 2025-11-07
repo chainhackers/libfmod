@@ -119,22 +119,22 @@ impl Api {
     pub fn patch_field_into(&self, structure: &str, field: &str) -> Option<TokenStream> {
         let expression = match (structure, field) {
             ("FMOD_CREATESOUNDEXINFO", "inclusionlist") => {
-                quote! { opt_ptr!(self.inclusionlist.clone(), |v| v.as_slice().as_ptr()as *mut _) }
+                quote! { opt_ptr!(value.inclusionlist.clone(), |v| v.as_slice().as_ptr()as *mut _) }
             }
             ("FMOD_CREATESOUNDEXINFO", "inclusionlistnum") => {
-                quote! { self.inclusionlist.map(|v| v.len()).unwrap_or(0) as _ }
+                quote! { value.inclusionlist.map(|v| v.len()).unwrap_or(0) as _ }
             }
             ("FMOD_CREATESOUNDEXINFO", "dlsname") => {
-                quote! { opt_ptr!(self.dlsname.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
+                quote! { opt_ptr!(value.dlsname.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
             }
             ("FMOD_CREATESOUNDEXINFO", "encryptionkey") => {
-                quote! { opt_ptr!(self.encryptionkey.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
+                quote! { opt_ptr!(value.encryptionkey.map(|v| Box::leak(CString::new(v).unwrap().into_boxed_c_str())), |v| v.as_ptr()) }
             }
             ("FMOD_CREATESOUNDEXINFO", "initialsoundgroup") => {
-                quote! { opt_ptr!(self.initialsoundgroup, |v| v.as_mut_ptr()) }
+                quote! { opt_ptr!(value.initialsoundgroup, |v| v.as_mut_ptr()) }
             }
             ("FMOD_CREATESOUNDEXINFO", "fsbguid") => {
-                quote! { opt_ptr!(self.fsbguid, |v| &mut v.into() as *mut _) }
+                quote! { opt_ptr!(value.fsbguid, |v| &mut v.into() as *mut _) }
             }
             ("FMOD_CREATESOUNDEXINFO", "cbsize") => {
                 quote! { size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32 }
@@ -146,49 +146,49 @@ impl Api {
                 quote! { size_of::<ffi::FMOD_STUDIO_ADVANCEDSETTINGS>() as i32 }
             }
             ("FMOD_DSP_DESCRIPTION", "numparameters") => {
-                quote! { self.paramdesc.len() as i32 }
+                quote! { value.paramdesc.len() as i32 }
             }
             ("FMOD_DSP_PARAMETER_3DATTRIBUTES_MULTI", "relative") => {
-                quote! { self.relative.map(Attributes3d::into) }
+                quote! { value.relative.map(Attributes3d::into) }
             }
             ("FMOD_OUTPUT_OBJECT3DINFO", "buffer") => {
-                quote! { self.buffer.as_ptr() as *mut _ }
+                quote! { value.buffer.as_ptr() as *mut _ }
             }
             ("FMOD_ADVANCEDSETTINGS", "ASIOChannelList") => {
-                quote! { vec_as_mut_ptr(self.asio_channel_list, |val| val.as_ptr()).cast() }
+                quote! { vec_as_mut_ptr(value.asio_channel_list, |val| val.as_ptr()).cast() }
             }
             ("FMOD_ADVANCEDSETTINGS", "ASIOSpeakerList") => {
-                quote! { vec_as_mut_ptr(self.asio_speaker_list, |val| val.into()) }
+                quote! { vec_as_mut_ptr(value.asio_speaker_list, |val| val.into()) }
             }
             ("FMOD_DSP_BUFFER_ARRAY", "buffernumchannels") => {
-                quote! { self.buffernumchannels.as_ptr() as *mut _ }
+                quote! { value.buffernumchannels.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_BUFFER_ARRAY", "bufferchannelmask") => {
-                quote! { self.bufferchannelmask.as_ptr() as *mut _ }
+                quote! { value.bufferchannelmask.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_BUFFER_ARRAY", "buffers") => {
-                quote! { self.buffers.as_ptr() as *mut _ }
+                quote! { value.buffers.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR", "pointparamvalues") => {
-                quote! { self.pointparamvalues.as_ptr() as *mut _ }
+                quote! { value.pointparamvalues.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR", "pointpositions") => {
-                quote! { self.pointpositions.as_ptr() as *mut _ }
+                quote! { value.pointpositions.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_PARAMETER_DESC_INT", "valuenames") => {
-                quote! { self.valuenames.as_ptr() as *mut _ }
+                quote! { value.valuenames.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_PARAMETER_DESC_BOOL", "valuenames") => {
-                quote! { self.valuenames.as_ptr() as *mut _ }
+                quote! { value.valuenames.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_DESCRIPTION", "paramdesc") => {
-                quote! { vec_as_mut_ptr(self.paramdesc, |param| Box::leak(Box::new(param.into())) as *mut _) }
+                quote! { vec_as_mut_ptr(value.paramdesc, |param| Box::leak(Box::new(param.into())) as *mut _) }
             }
             ("FMOD_DSP_STATE", "sidechaindata") => {
-                quote! { self.sidechaindata.as_ptr() as *mut _ }
+                quote! { value.sidechaindata.as_ptr() as *mut _ }
             }
             ("FMOD_DSP_PARAMETER_FFT", "numchannels") => {
-                quote! { self.spectrum.len() as i32 }
+                quote! { value.spectrum.len() as i32 }
             }
             ("FMOD_DSP_PARAMETER_FFT", "spectrum") => {
                 quote! { [null_mut(); 32] }

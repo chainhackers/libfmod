@@ -82,9 +82,9 @@ pub fn generate_flags(flags: &Flags) -> (String, String) {
     );
     let into = format!(
         r#"
-impl Into<ffi::{flags}> for {name} {{
-    fn into(self) -> ffi::{flags} {{
-        self.bits
+impl From<{name}> for ffi::{flags} {{
+    fn from(value: {name}) -> ffi::{flags} {{
+        value.bits
     }}
 }}
     "#
